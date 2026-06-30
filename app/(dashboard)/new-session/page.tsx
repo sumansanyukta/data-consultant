@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, ArrowRight, Loader2 } from "lucide-react";
 import { useClients } from "@/lib/supabase/hooks";
 import { createSession } from "@/lib/supabase/queries";
+import { getSupabase } from "@/lib/supabase/client";
 
 const types = ["Descriptive", "Diagnostic", "Predictive", "Prescriptive"];
 
@@ -13,9 +14,17 @@ export default function NewSessionPage() {
   const { data: clients } = useClients();
   const [clientMode, setClientMode] = useState<"existing" | "new">("existing");
   const [selectedClient, setSelectedClient] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newSector, setNewSector] = useState("");
   const [title, setTitle] = useState("");
   const [analysisType, setAnalysisType] = useState<string[]>(["Descriptive"]);
   const [creating, setCreating] = useState(false);
+
+  useEffect(() => {
+    if (clients && clients.length > 0 && !selectedClient) {
+      setSelectedClient(clients[0].id);
+    }
+  }, [clients, selectedClient]);
 
   const toggleType = (t: string) =>
     setAnalysisType((prev) =>
@@ -23,6 +32,10 @@ export default function NewSessionPage() {
     );
 
   const client = clients?.find((c) => c.id === selectedClient);
+
+  const canContinue = clientMode === "existing"
+    ? selectedClient && title
+    : newName && title;
 
   return (
     <div className="p-8">
@@ -69,7 +82,9 @@ export default function NewSessionPage() {
                   onChange={(e) => setSelectedClient(e.target.value)}
                   className="w-full appearance-none bg-input-background border border-border rounded-xl px-4 py-3 text-sm text-foreground pr-9 focus:outline-none focus:ring-2 focus:ring-ring"
                 >
-                  <option value="">Select a client</option>
+                  {(clients ?? []).length === 0 && (
+                    <option value="">No clients yet — switch to "Create new"</option>
+                  )}
                   {(clients ?? []).map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name} — {c.sector}
@@ -81,11 +96,15 @@ export default function NewSessionPage() {
             ) : (
               <div className="space-y-3">
                 <input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
                   placeholder="Company name"
                   className="w-full bg-input-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
                 <input
-                  placeholder="Sector (e.g. Financial Services)"
+                  value={newSector}
+                  onChange={(e) => setNewSector(e.target.value)}
+                  placeholder="Sector (e.g. E-Commerce)"
                   className="w-full bg-input-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
@@ -100,12 +119,12 @@ export default function NewSessionPage() {
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-medium text-foreground block mb-1.5">
-                  Session title
+                  Session title <span className="text-red-400">*</span>
                 </label>
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Q2 Churn Attribution — Retail Segment"
+                  placeholder="e.g. Amazon Reviews — Sentiment & Trends"
                   className="w-full bg-input-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
@@ -147,11 +166,25 @@ export default function NewSessionPage() {
 
           <button
             onClick={async () => {
-              if (!selectedClient || !title) return;
+              if (!canContinue) return;
               setCreating(true);
               try {
+                let clientId = selectedClient;
+
+                // Create new client if in "new" mode
+                if (clientMode === "new") {
+                  const sb = getSupabase();
+                  const { data: newClient, error } = await sb
+                    .from("clients")
+                    .insert({ name: newName, sector: newSector || "Unknown" })
+                    .select()
+                    .single();
+                  if (error) throw error;
+                  clientId = newClient.id;
+                }
+
                 const session = await createSession({
-                  clientId: selectedClient,
+                  clientId,
                   title,
                   consultant: "Lena Fischer",
                   analysisType,
@@ -162,9 +195,9 @@ export default function NewSessionPage() {
                 setCreating(false);
               }
             }}
-            disabled={!selectedClient || !title || creating}
+            disabled={!canContinue || creating}
             className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-colors shadow-sm ${
-              selectedClient && title && !creating
+              canContinue && !creating
                 ? "bg-primary text-primary-foreground hover:bg-primary/90"
                 : "bg-muted text-muted-foreground cursor-not-allowed"
             }`}
@@ -194,9 +227,7 @@ export default function NewSessionPage() {
                 { step: "04", label: "Run analysis", desc: "The AI pipeline structures your starting point." },
               ].map(({ step, label, desc }) => (
                 <div key={step} className="flex gap-3">
-                  <span className="text-[11px] font-mono font-semibold text-muted-foreground/60 w-5 flex-shrink-0 pt-0.5">
-                    {step}
-                  </span>
+                  <span className="text-[11px] font-mono font-semibold text-muted-foreground/60 w-5 flex-shrink-0 pt-0.5">{step}</span>
                   <div>
                     <p className="text-xs font-medium text-foreground">{label}</p>
                     <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
@@ -206,11 +237,9 @@ export default function NewSessionPage() {
             </div>
           </div>
 
-          {client && (
+          {client && clientMode === "existing" && (
             <div className="bg-card border border-border rounded-[14px] p-5">
-              <p className="text-[11px] font-mono font-semibold tracking-widest uppercase text-muted-foreground mb-3">
-                Client context
-              </p>
+              <p className="text-[11px] font-mono font-semibold tracking-widest uppercase text-muted-foreground mb-3">Client context</p>
               <div className="space-y-2">
                 <p className="text-sm font-medium text-foreground">{client.name}</p>
                 <p className="text-xs text-muted-foreground">{client.sector}</p>
