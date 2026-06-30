@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronRight,
   Upload,
@@ -45,17 +45,37 @@ function computeNullPct(rows: Record<string, unknown>[], col: string): number {
   return Math.round((nulls / rows.length) * 100);
 }
 
-export default function IntakePage() {
+function IntakeInner() {
   const router = useRouter();
-  const [brief, setBrief] = useState(
-    `We've been seeing a consistent decline in active monthly riders since Q4 last year across all our core routes. Management wants to understand what's driving this — whether it's a pricing issue, a service quality issue, or external factors like the new cycling lanes. We have some transaction data from our ticketing system and some aggregate ridership counts by route and time-of-day, but it's messy. We also have some customer satisfaction survey results from last year. The board is asking for a clear picture of root causes and what levers we actually have.\n\nThe main question: why are riders churning, and which levers do we control?`
-  );
+  const [brief, setBrief] = useState("");
+
+  const BRIEF_PRESETS = [
+    {
+      label: "I have data, not sure what to look for",
+      text: "I have a dataset and I want to explore it to find useful insights. I'm looking for trends, outliers, patterns, or anything notable that could inform business decisions. A broad exploratory analysis would be helpful to understand what the data can tell us.",
+    },
+    {
+      label: "Why is a metric changing?",
+      text: "We've observed a significant change in a key metric over recent periods and need to understand the root cause. The data covers the relevant timeframe. We want to identify which factors are driving the change and quantify their relative contribution.",
+    },
+    {
+      label: "Predict an outcome",
+      text: "We have historical data on past outcomes and want to build a predictive view. The goal is to forecast future results based on the patterns in our data, so we can plan and allocate resources more effectively.",
+    },
+    {
+      label: "Find patterns / segments",
+      text: "We want to segment our data to identify distinct groups or patterns. The goal is to understand natural groupings in the data — whether by customer behaviour, operational performance, or other dimensions — so we can tailor strategies accordingly.",
+    },
+  ];
   const [goal, setGoal] = useState("diagnostic");
   const [parsedFile, setParsedFile] = useState<ParsedFile | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [draftId] = useState(() => crypto.randomUUID());
+  const [csvContent, setCsvContent] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("sessionId") ?? crypto.randomUUID();
 
   const validations = [
     {
@@ -65,8 +85,8 @@ export default function IntakePage() {
     },
     {
       label: "Business question",
-      ok: /why|what|how/.test(brief.toLowerCase()),
-      msg: /why|what|how/.test(brief.toLowerCase()) ? "Key question identified" : "No question detected",
+      ok: /why|what|how|want to|goal/i.test(brief),
+      msg: /why|what|how|want to|goal/i.test(brief) ? "Objective identified" : "No question or goal detected",
     },
     {
       label: "Data sample",
@@ -88,6 +108,7 @@ export default function IntakePage() {
 
       // Parse CSV on the client
       const text = await file.text();
+      setCsvContent(text);
       const result = Papa.parse(text, { header: true, skipEmptyLines: true, preview: 100 });
       const headers = result.meta.fields ?? [];
       const sample = result.data as Record<string, unknown>[];
@@ -111,7 +132,7 @@ export default function IntakePage() {
 
       // Upload to Supabase Storage
       const sb = getSupabase();
-      const storagePath = `uploads/${draftId}/${file.name}`;
+      const storagePath = `uploads/${sessionId}/${file.name}`;
       const { error: uploadErr } = await sb.storage
         .from("client-uploads")
         .upload(storagePath, file, { upsert: true });
@@ -133,14 +154,14 @@ export default function IntakePage() {
         sample: sample.slice(0, 5),
         rawDtypes,
         nullPct,
-        sessionId: draftId,
+        sessionId,
       });
     } catch (e: any) {
       setUploadError(e.message ?? "Upload failed");
     } finally {
       setUploading(false);
     }
-  }, [draftId]);
+  }, [sessionId]);
 
   const onDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -183,14 +204,37 @@ export default function IntakePage() {
         {/* Left: Brief + Goal */}
         <div className="col-span-3 space-y-5">
           <div className="bg-card border border-border rounded-[14px] p-6">
-            <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">
-              Client Brief
-            </p>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono">
+                Client Brief
+              </p>
+              {brief.length > 0 && (
+                <button
+                  onClick={() => setBrief("")}
+                  className="text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            {brief.length === 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {BRIEF_PRESETS.map((preset) => (
+                  <button
+                    key={preset.label}
+                    onClick={() => setBrief(preset.text)}
+                    className="text-[11px] font-medium px-2.5 py-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors border border-border"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            )}
             <textarea
               value={brief}
               onChange={(e) => setBrief(e.target.value)}
               rows={10}
-              placeholder="Paste the client's brief here — raw email, meeting notes, or any unstructured description of the problem..."
+              placeholder={brief.length === 0 ? "Select a preset above, or paste your own brief here..." : ""}
               className="w-full bg-input-background border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none leading-relaxed"
             />
             <div className="flex items-center justify-between mt-2">
@@ -376,23 +420,59 @@ export default function IntakePage() {
 
           {/* Run Analysis */}
           <button
-            onClick={() => {
-              if (parsedFile) {
-                router.push("/analysis-running");
+            onClick={async () => {
+              if (!parsedFile || !csvContent) return;
+              setRunning(true);
+              try {
+                const res = await fetch("/api/pipeline/run", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    sessionId,
+                    csvContent,
+                    fileName: parsedFile.fileName,
+                    storagePath: parsedFile.fileUrl,
+                    briefText: brief,
+                    businessGoal: goal,
+                  }),
+                });
+                if (!res.ok) throw new Error(await res.text());
+                router.push(`/analysis-running?sessionId=${sessionId}`);
+              } catch (e: any) {
+                console.error("Pipeline run failed", e);
+                setRunning(false);
               }
             }}
-            disabled={!parsedFile}
+            disabled={!parsedFile || !csvContent || running}
             className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-colors shadow-sm ${
-              parsedFile
+              parsedFile && csvContent && !running
                 ? "bg-primary text-primary-foreground hover:bg-primary/90"
                 : "bg-muted text-muted-foreground cursor-not-allowed"
             }`}
           >
-            <Sparkles className="w-4 h-4" />
-            Run Analysis
+            {running ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                Run Analysis
+              </>
+            )}
           </button>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function IntakePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex-1 flex items-center justify-center p-8">
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+      </div>
+    }>
+      <IntakeInner />
+    </Suspense>
   );
 }

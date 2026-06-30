@@ -360,6 +360,38 @@ export async function finalizeSession(
   if (error) throw error;
 }
 
+export async function saveSessionOutput(
+  sessionId: string,
+  output: {
+    execSummary: string;
+    keySignals: string[];
+    dataQualityFlags: any[];
+    recommendedAnalyses: any[];
+    followUpQuestions: string[];
+    assumptions: string[];
+    confidenceScore: number;
+    dataCompleteness: number;
+  }
+): Promise<SessionOutput> {
+  const { data, error } = await getSupabase()
+    .from("session_outputs")
+    .upsert({
+      session_id: sessionId,
+      exec_summary: output.execSummary,
+      key_signals: output.keySignals,
+      data_quality_flags: output.dataQualityFlags,
+      recommended_analyses: output.recommendedAnalyses,
+      follow_up_questions: output.followUpQuestions,
+      assumptions: output.assumptions,
+      confidence_score: output.confidenceScore,
+      data_completeness: output.dataCompleteness,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return toSessionOutput(data as SessionOutputRow);
+}
+
 export async function addConsultantNote(
   sessionId: string,
   noteText: string

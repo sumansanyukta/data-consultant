@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ArrowRight } from "lucide-react";
+import { ChevronDown, ArrowRight, Loader2 } from "lucide-react";
 import { useClients } from "@/lib/supabase/hooks";
+import { createSession } from "@/lib/supabase/queries";
 
 const types = ["Descriptive", "Diagnostic", "Predictive", "Prescriptive"];
 
@@ -14,6 +15,7 @@ export default function NewSessionPage() {
   const [selectedClient, setSelectedClient] = useState("");
   const [title, setTitle] = useState("");
   const [analysisType, setAnalysisType] = useState<string[]>(["Descriptive"]);
+  const [creating, setCreating] = useState(false);
 
   const toggleType = (t: string) =>
     setAnalysisType((prev) =>
@@ -144,11 +146,37 @@ export default function NewSessionPage() {
           </div>
 
           <button
-            onClick={() => router.push("/intake")}
-            className="flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm"
+            onClick={async () => {
+              if (!selectedClient || !title) return;
+              setCreating(true);
+              try {
+                const session = await createSession({
+                  clientId: selectedClient,
+                  title,
+                  consultant: "Lena Fischer",
+                  analysisType,
+                });
+                router.push(`/intake?sessionId=${session.id}`);
+              } catch (e) {
+                console.error("Failed to create session", e);
+                setCreating(false);
+              }
+            }}
+            disabled={!selectedClient || !title || creating}
+            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-colors shadow-sm ${
+              selectedClient && title && !creating
+                ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                : "bg-muted text-muted-foreground cursor-not-allowed"
+            }`}
           >
-            Continue to Brief & Data
-            <ArrowRight className="w-4 h-4" />
+            {creating ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                Continue to Brief & Data
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
           </button>
         </div>
 
