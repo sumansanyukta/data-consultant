@@ -8,7 +8,7 @@ const WORKFLOW_ROUTES = ["/new-session", "/intake", "/analysis-running", "/resul
 const breadcrumbLabels: Record<string, string> = {
   "/": "Overview · All clients",
   "/history": "History · All sessions",
-  "/session-detail": "Session · BVG Ridership Decline Q1–Q2 2024",
+  "/session-detail": "Session Detail",
 };
 
 export function TopBar() {

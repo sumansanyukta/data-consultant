@@ -85,7 +85,7 @@ export default function HistoryPage() {
             {filtered.map((session) => (
               <div
                 key={session.id}
-                onClick={() => router.push("/session-detail")}
+                onClick={() => router.push(`/session-detail?sessionId=${session.id}`)}
                 className="bg-card border border-border rounded-[14px] p-5 hover:border-primary/20 transition-colors cursor-pointer group"
               >
                 <div className="flex items-start gap-4">
@@ -147,7 +147,7 @@ export default function HistoryPage() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          router.push("/session-detail");
+                          router.push(`/session-detail?sessionId=${session.id}`);
                         }}
                         className="text-xs font-medium text-primary hover:underline flex items-center gap-1"
                       >

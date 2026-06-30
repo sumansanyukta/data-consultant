@@ -92,7 +92,7 @@ export default function DashboardPage() {
               {(sessions ?? []).map((session) => (
                 <Link
                   key={session.id}
-                  href={`/session-detail`}
+                  href={`/session-detail?sessionId=${session.id}`}
                   className="flex items-center gap-4 px-5 py-4 hover:bg-muted/50 transition-colors first:rounded-t-[14px] last:rounded-b-[14px]"
                 >
                   <div

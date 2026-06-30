@@ -1,16 +1,43 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import {
-  ChevronRight,
-  ArrowRight,
-  BookOpen,
-} from "lucide-react";
-import { RECENT_SESSIONS } from "@/lib/mock-data";
+import { Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ChevronRight, ArrowRight, BookOpen, Loader2 } from "lucide-react";
+import { useSessionDetail } from "@/lib/supabase/hooks";
 
-export default function SessionDetailPage() {
+function SessionDetailInner() {
   const router = useRouter();
-  const session = RECENT_SESSIONS[0];
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("sessionId") ?? "";
+  const { data, loading } = useSessionDetail(sessionId);
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  const session = data?.session;
+  const output = data?.output;
+  const input = data?.input;
+  const client = data?.client;
+
+  if (!session) {
+    return (
+      <div className="p-8">
+        <p className="text-sm text-muted-foreground">Session not found.</p>
+      </div>
+    );
+  }
+
+  const dataFile = input?.dataFiles?.[0];
+  const fileName = dataFile?.fileName ?? "Unknown";
+  const briefText = input?.briefText ?? "";
+  const recommendedAnalyses = output?.recommendedAnalyses ?? [];
+  const dataCompleteness = output?.dataCompleteness ?? 0;
+  const flags = output?.dataQualityFlags ?? [];
 
   return (
     <div className="p-8">
@@ -24,7 +51,7 @@ export default function SessionDetailPage() {
       <div className="flex items-start justify-between mb-7">
         <div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2 font-mono">
-            <span>{session.clientName}</span>
+            <span>{client?.name ?? "Client"}</span>
             <ChevronRight className="w-3 h-3" />
             <span className="text-foreground">{session.title}</span>
           </div>
@@ -40,7 +67,7 @@ export default function SessionDetailPage() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => router.push("/results")}
+            onClick={() => router.push(`/results?sessionId=${sessionId}`)}
             className="flex items-center gap-2 bg-muted text-foreground px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-secondary transition-colors"
           >
             <BookOpen className="w-4 h-4" />
@@ -56,30 +83,36 @@ export default function SessionDetailPage() {
               Session Summary
             </p>
             <p className="text-sm text-foreground leading-relaxed">
-              {session.summary}
+              {output?.execSummary ?? "No summary available."}
             </p>
           </div>
 
-          <div className="bg-card border border-border rounded-[14px] p-6">
-            <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">
-              Original Brief (excerpt)
-            </p>
-            <blockquote className="text-sm text-muted-foreground leading-relaxed border-l-2 border-primary/30 pl-4 italic">
-              &ldquo;We&apos;ve been seeing a consistent decline in active monthly
-              riders since Q4 last year across all our core routes. Management
-              wants to understand what&apos;s driving this — whether it&apos;s a
-              pricing issue, a service quality issue, or external factors like
-              the new cycling lanes&hellip;&rdquo;
-            </blockquote>
-          </div>
+          {briefText && (
+            <div className="bg-card border border-border rounded-[14px] p-6">
+              <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">
+                Original Brief (excerpt)
+              </p>
+              <blockquote className="text-sm text-muted-foreground leading-relaxed border-l-2 border-primary/30 pl-4 italic">
+                &ldquo;{briefText}&rdquo;
+              </blockquote>
+            </div>
+          )}
 
           <div className="bg-card border border-border rounded-[14px] p-6">
             <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">
               Consultant Notes
             </p>
-            <p className="text-sm text-muted-foreground leading-relaxed italic">
-              No notes recorded for this session.
-            </p>
+            {data && data.notes.length > 0 ? (
+              <div className="space-y-3">
+                {data.notes.map((note) => (
+                  <p key={note.id} className="text-sm text-foreground leading-relaxed">{note.noteText}</p>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground leading-relaxed italic">
+                No notes recorded for this session.
+              </p>
+            )}
           </div>
         </div>
 
@@ -90,16 +123,12 @@ export default function SessionDetailPage() {
             </p>
             <div className="space-y-3 text-xs">
               {[
-                ["Client", session.clientName],
-                ["Objective", "Diagnostic"],
+                ["Client", client?.name ?? "Unknown"],
+                ["Objective", input?.businessGoal ?? "Diagnostic"],
                 ["Consultant", session.consultant],
                 ["Date", session.date],
-                [
-                  "Status",
-                  session.status.charAt(0).toUpperCase() +
-                    session.status.slice(1),
-                ],
-                ["Data", "ridership_q1q2_2024.csv"],
+                ["Status", session.status.charAt(0).toUpperCase() + session.status.slice(1)],
+                ["Data", fileName],
               ].map(([k, v]) => (
                 <div key={k} className="flex gap-3">
                   <span className="text-muted-foreground font-mono w-20 flex-shrink-0">
@@ -137,33 +166,51 @@ export default function SessionDetailPage() {
               <div>
                 <div className="flex justify-between text-[11px] font-mono text-muted-foreground mb-1.5">
                   <span>Data completeness</span>
-                  <span>61%</span>
+                  <span>{dataCompleteness}%</span>
                 </div>
                 <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-amber-500"
-                    style={{ width: "61%" }}
+                    className={`h-full rounded-full ${
+                      dataCompleteness >= 75
+                        ? "bg-emerald-500"
+                        : dataCompleteness >= 55
+                        ? "bg-amber-500"
+                        : "bg-red-400"
+                    }`}
+                    style={{ width: `${dataCompleteness}%` }}
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-card border border-border rounded-[14px] p-5 bg-muted/40">
-            <p className="text-[11px] font-mono font-semibold tracking-widest uppercase text-muted-foreground mb-3">
-              Recommended next step
-            </p>
-            <div className="flex items-start gap-2.5">
-              <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-foreground leading-relaxed">
-                Schedule stakeholder workshop with BVG operations team to
-                validate route-level hypotheses before proceeding to formal
-                analysis.
+          {recommendedAnalyses.length > 0 && (
+            <div className="bg-card border border-border rounded-[14px] p-5 bg-muted/40">
+              <p className="text-[11px] font-mono font-semibold tracking-widest uppercase text-muted-foreground mb-3">
+                Recommended next step
               </p>
+              <div className="flex items-start gap-2.5">
+                <ArrowRight className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-foreground leading-relaxed">
+                  {recommendedAnalyses[0].desc}
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SessionDetailPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex-1 flex items-center justify-center p-8">
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+      </div>
+    }>
+      <SessionDetailInner />
+    </Suspense>
   );
 }

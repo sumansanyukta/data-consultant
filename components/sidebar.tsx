@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Plus, FileClock, Database } from "lucide-react";
+import { useClients } from "@/lib/supabase/hooks";
 
 const NAV_ITEMS = [
   { id: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -10,15 +11,9 @@ const NAV_ITEMS = [
   { id: "/new-session", label: "New Session", icon: Plus },
 ] as const;
 
-const CLIENTS = [
-  { id: "c1", name: "Berliner Volksbank AG", initial: "B" },
-  { id: "c2", name: "Siemens Energy GmbH", initial: "S" },
-  { id: "c3", name: "BVG Berliner Verkehrsbetriebe", initial: "B" },
-  { id: "c4", name: "Zalando SE", initial: "Z" },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: clients } = useClients();
 
   const isNavActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -78,14 +73,19 @@ export function Sidebar() {
           <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono px-2 mb-2">
             Clients
           </p>
-          {CLIENTS.map((c) => (
+          {(clients ?? []).length === 0 && (
+            <div className="px-3 py-2">
+              <p className="text-[11px] text-muted-foreground">No clients yet.</p>
+            </div>
+          )}
+          {(clients ?? []).slice(0, 6).map((c) => (
             <Link
               key={c.id}
               href="/history"
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[10px] text-[12.5px] text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-150"
             >
               <div className="w-5 h-5 rounded-md bg-secondary flex items-center justify-center flex-shrink-0 text-[10px] font-semibold text-muted-foreground">
-                {c.initial}
+                {c.name.charAt(0)}
               </div>
               <span className="truncate">{c.name.split(" ")[0]}</span>
             </Link>
