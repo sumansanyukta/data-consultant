@@ -1,6 +1,23 @@
+"use client";
+
 import Link from "next/link";
+import { useRecentSessions, useClients, useDashboardStats } from "@/lib/supabase/hooks";
 
 export default function DashboardPage() {
+  const { data: stats, loading: statsLoading } = useDashboardStats();
+  const { data: sessions } = useRecentSessions(4);
+  const { data: clients } = useClients();
+
+  const formatDay = () => {
+    const d = new Date();
+    return d.toLocaleDateString("en-GB", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
   return (
     <div className="p-8">
       {/* Header */}
@@ -13,7 +30,7 @@ export default function DashboardPage() {
             Good morning, Lena.
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Monday, 29 June 2026 · 3 active clients this week
+            {formatDay()} · {statsLoading ? "..." : `${stats?.activeClients ?? 0} active clients`}
           </p>
         </div>
         <Link
@@ -36,10 +53,10 @@ export default function DashboardPage() {
       {/* Stats row */}
       <div className="grid grid-cols-4 gap-4 mb-7">
         {[
-          { label: "Active Clients", value: "5", sub: "+1 this quarter" },
-          { label: "Sessions This Month", value: "12", sub: "4 complete · 1 draft" },
-          { label: "Avg. Confidence", value: "76%", sub: "Across all sessions" },
-          { label: "Data Uploads", value: "18", sub: "CSV · Excel · JSON" },
+          { label: "Active Clients", value: String(stats?.activeClients ?? 0), sub: "Across all clients" },
+          { label: "Sessions This Month", value: String(stats?.sessionsThisMonth ?? 0), sub: `${stats?.completeSessions ?? 0} complete · ${stats?.draftSessions ?? 0} draft` },
+          { label: "Avg. Confidence", value: `${stats?.avgConfidence ?? 0}%`, sub: "Across all sessions" },
+          { label: "Data Uploads", value: String(stats?.dataUploads ?? 0), sub: "CSV · Excel · JSON" },
         ].map(({ label, value, sub }) => (
           <div key={label} className="bg-card border border-border rounded-[14px] p-5">
             <div className="flex items-start justify-between">
@@ -67,46 +84,15 @@ export default function DashboardPage() {
           </p>
           <div className="bg-card border border-border rounded-[14px]">
             <div className="divide-y divide-border">
-              {[
-                {
-                  id: "s1",
-                  title: "Ridership Decline Q1–Q2 2024",
-                  client: "BVG Berliner Verkehrsbetriebe",
-                  consultant: "Lena Fischer",
-                  confidence: 82,
-                  status: "complete" as const,
-                  date: "29 Jun 2026",
-                },
-                {
-                  id: "s2",
-                  title: "SME Credit Portfolio Risk Exposure",
-                  client: "Berliner Volksbank AG",
-                  consultant: "Max Brauer",
-                  confidence: 74,
-                  status: "complete" as const,
-                  date: "27 Jun 2026",
-                },
-                {
-                  id: "s3",
-                  title: "Field Service Efficiency Baseline",
-                  client: "Siemens Energy GmbH",
-                  consultant: "Sophia Kern",
-                  confidence: 61,
-                  status: "draft" as const,
-                  date: "22 Jun 2026",
-                },
-                {
-                  id: "s4",
-                  title: "Returns Attribution Model",
-                  client: "Zalando SE",
-                  consultant: "Lena Fischer",
-                  confidence: 88,
-                  status: "complete" as const,
-                  date: "18 Jun 2026",
-                },
-              ].map((session) => (
-                <div
+              {(sessions ?? []).length === 0 && (
+                <div className="px-5 py-8 text-center">
+                  <p className="text-sm text-muted-foreground">No sessions yet.</p>
+                </div>
+              )}
+              {(sessions ?? []).map((session) => (
+                <Link
                   key={session.id}
+                  href={`/session-detail`}
                   className="flex items-center gap-4 px-5 py-4 hover:bg-muted/50 transition-colors first:rounded-t-[14px] last:rounded-b-[14px]"
                 >
                   <div
@@ -128,7 +114,7 @@ export default function DashboardPage() {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground truncate">
-                      {session.client} · {session.consultant}
+                      {session.consultant}
                     </p>
                   </div>
                   <div className="flex-shrink-0 w-32">
@@ -166,7 +152,7 @@ export default function DashboardPage() {
                       d="M9 5l7 7-7 7"
                     />
                   </svg>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -230,14 +216,14 @@ export default function DashboardPage() {
             </p>
             <div className="bg-card border border-border rounded-[14px]">
               <div className="divide-y divide-border">
-                {[
-                  { name: "Berliner Volksbank AG", sector: "Financial Services", sessions: 7, active: "3 days ago" },
-                  { name: "Siemens Energy GmbH", sector: "Energy", sessions: 4, active: "1 week ago" },
-                  { name: "BVG Berliner Verkehrsbetriebe", sector: "Public Transport", sessions: 11, active: "Today" },
-                  { name: "Zalando SE", sector: "E-Commerce", sessions: 3, active: "2 weeks ago" },
-                ].map((client) => (
+                {(clients ?? []).length === 0 && (
+                  <div className="px-4 py-6 text-center">
+                    <p className="text-xs text-muted-foreground">No clients yet.</p>
+                  </div>
+                )}
+                {(clients ?? []).slice(0, 4).map((client) => (
                   <div
-                    key={client.name}
+                    key={client.id}
                     className="flex items-center gap-3 px-4 py-3"
                   >
                     <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0 text-[11px] font-semibold text-foreground">
@@ -248,7 +234,7 @@ export default function DashboardPage() {
                         {client.name.split(" ").slice(0, 2).join(" ")}
                       </p>
                       <p className="text-[11px] text-muted-foreground">
-                        {client.sessions} sessions · {client.active}
+                        {client.sessions} sessions · {client.lastActive}
                       </p>
                     </div>
                     <span className="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full font-mono tracking-wide bg-muted text-muted-foreground">

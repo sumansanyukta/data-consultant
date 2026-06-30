@@ -3,18 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, ChevronRight } from "lucide-react";
-import { CLIENTS, RECENT_SESSIONS } from "@/lib/mock-data";
+import { useClients, useSessions } from "@/lib/supabase/hooks";
 
 export default function HistoryPage() {
   const router = useRouter();
+  const { data: clients } = useClients();
+  const { data: sessions } = useSessions();
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
 
-  const filtered = selectedClient
-    ? RECENT_SESSIONS.filter(
-        (s) =>
-          s.clientName === CLIENTS.find((c) => c.id === selectedClient)?.name
-      )
-    : RECENT_SESSIONS;
+  const filtered = selectedClient && sessions
+    ? sessions.filter((s) => s.clientId === selectedClient)
+    : sessions ?? [];
 
   return (
     <div className="p-8">
@@ -56,7 +55,7 @@ export default function HistoryPage() {
             >
               All clients
             </button>
-            {CLIENTS.map((c) => (
+            {(clients ?? []).map((c) => (
               <button
                 key={c.id}
                 onClick={() => setSelectedClient(c.id)}
@@ -78,6 +77,11 @@ export default function HistoryPage() {
             {filtered.length} session{filtered.length !== 1 ? "s" : ""}
           </p>
           <div className="space-y-3">
+            {filtered.length === 0 && (
+              <div className="bg-card border border-border rounded-[14px] p-8 text-center">
+                <p className="text-sm text-muted-foreground">No sessions found.</p>
+              </div>
+            )}
             {filtered.map((session) => (
               <div
                 key={session.id}
@@ -99,8 +103,7 @@ export default function HistoryPage() {
                           {session.title}
                         </h3>
                         <p className="text-xs text-muted-foreground mt-0.5 font-mono">
-                          {session.clientName} · {session.consultant} ·{" "}
-                          {session.date}
+                          {session.consultant} · {session.date}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">

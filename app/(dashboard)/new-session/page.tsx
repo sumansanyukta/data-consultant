@@ -3,14 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, ArrowRight } from "lucide-react";
-import { CLIENTS } from "@/lib/mock-data";
+import { useClients } from "@/lib/supabase/hooks";
 
 const types = ["Descriptive", "Diagnostic", "Predictive", "Prescriptive"];
 
 export default function NewSessionPage() {
   const router = useRouter();
+  const { data: clients } = useClients();
   const [clientMode, setClientMode] = useState<"existing" | "new">("existing");
-  const [selectedClient, setSelectedClient] = useState(CLIENTS[0].id);
+  const [selectedClient, setSelectedClient] = useState("");
   const [title, setTitle] = useState("");
   const [analysisType, setAnalysisType] = useState<string[]>(["Descriptive"]);
 
@@ -19,7 +20,7 @@ export default function NewSessionPage() {
       prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
     );
 
-  const client = CLIENTS.find((c) => c.id === selectedClient)!;
+  const client = clients?.find((c) => c.id === selectedClient);
 
   return (
     <div className="p-8">
@@ -66,7 +67,8 @@ export default function NewSessionPage() {
                   onChange={(e) => setSelectedClient(e.target.value)}
                   className="w-full appearance-none bg-input-background border border-border rounded-xl px-4 py-3 text-sm text-foreground pr-9 focus:outline-none focus:ring-2 focus:ring-ring"
                 >
-                  {CLIENTS.map((c) => (
+                  <option value="">Select a client</option>
+                  {(clients ?? []).map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name} — {c.sector}
                     </option>
