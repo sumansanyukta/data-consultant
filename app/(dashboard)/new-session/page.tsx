@@ -24,7 +24,10 @@ export default function NewSessionPage() {
     if (clients && clients.length > 0 && !selectedClient) {
       setSelectedClient(clients[0].id);
     }
-  }, [clients, selectedClient]);
+    if (clients && clients.length === 0 && clientMode === "existing") {
+      setClientMode("new");
+    }
+  }, [clients, selectedClient, clientMode]);
 
   const toggleType = (t: string) =>
     setAnalysisType((prev) =>
@@ -165,13 +168,13 @@ export default function NewSessionPage() {
           </div>
 
           <button
+            type="button"
             onClick={async () => {
               if (!canContinue) return;
               setCreating(true);
               try {
                 let clientId = selectedClient;
 
-                // Create new client if in "new" mode
                 if (clientMode === "new") {
                   const sb = getSupabase();
                   const { data: newClient, error } = await sb
@@ -196,9 +199,9 @@ export default function NewSessionPage() {
               }
             }}
             disabled={!canContinue || creating}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-colors shadow-sm ${
+            className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-colors shadow-sm ${
               canContinue && !creating
-                ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
                 : "bg-muted text-muted-foreground cursor-not-allowed"
             }`}
           >
