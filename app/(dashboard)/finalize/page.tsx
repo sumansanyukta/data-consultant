@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { CheckCircle2, Save } from "lucide-react";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { CheckCircle2, Save, Loader2 } from "lucide-react";
+import { useSessionDetail } from "@/lib/supabase/hooks";
 
 const nextSteps = [
   { id: "workshop", label: "Schedule stakeholder workshop" },
@@ -11,40 +12,63 @@ const nextSteps = [
   { id: "hold", label: "On hold — awaiting client input" },
 ];
 
-const summary = [
-  ["Client", "BVG Berliner Verkehrsbetriebe"],
-  ["Session", "Ridership Decline Q1–Q2 2024"],
-  ["Consultant", "Lena Fischer"],
-  ["Date", "29 Jun 2026"],
-  ["Objective", "Diagnostic"],
-  ["Data uploaded", "ridership_q1q2_2024.csv"],
-];
-
-const metrics = [
-  { label: "Confidence score", value: "82%", ok: true },
-  { label: "Data completeness", value: "61%", ok: false },
-  { label: "Suggested analyses", value: "3", ok: true },
-  { label: "Data quality flags", value: "4", ok: false },
-  { label: "Follow-up questions", value: "4", ok: true },
-];
-
-export default function FinalizePage() {
+function FinalizeInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("sessionId") ?? "";
+  const { data, loading } = useSessionDetail(sessionId);
   const [nextStep, setNextStep] = useState("workshop");
-  const [recommendation, setRecommendation] = useState(
-    `Proceed with route-level ridership decomposition as the priority analysis track. Before running any comparative analysis, isolate the ticketing system migration artefact (July 2023) to avoid confounded conclusions.\n\nRecommend a 2-week data sprint to obtain complete ticket-type tagging and resolve the negative-rider-count anomaly, then schedule a stakeholder workshop to validate hypotheses with the operations team.`
-  );
+  const [recommendation, setRecommendation] = useState("");
   const [saved, setSaved] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+      </div>
+    );
+  }
+
+  const session = data?.session;
+  const output = data?.output;
+  const input = data?.input;
+  const client = data?.client;
+
+  if (!session || !output) {
+    return (
+      <div className="p-8">
+        <p className="text-sm text-muted-foreground">No session data found.</p>
+      </div>
+    );
+  }
+
+  const dataFile = input?.dataFiles?.[0];
+  const fileName = dataFile?.fileName ?? "Unknown file";
+
+  const summary = [
+    ["Client", client?.name ?? "Unknown"],
+    ["Session", session.title],
+    ["Consultant", session.consultant],
+    ["Date", session.date],
+    ["Objective", input?.businessGoal ?? "Diagnostic"],
+    ["Data uploaded", fileName],
+  ];
+
+  const metrics = [
+    { label: "Confidence score", value: `${output.confidenceScore}%`, ok: output.confidenceScore >= 65 },
+    { label: "Data completeness", value: `${output.dataCompleteness}%`, ok: output.dataCompleteness >= 70 },
+    { label: "Suggested analyses", value: String(output.recommendedAnalyses.length), ok: output.recommendedAnalyses.length > 0 },
+    { label: "Data quality flags", value: String(output.dataQualityFlags.length), ok: output.dataQualityFlags.length === 0 },
+    { label: "Follow-up questions", value: String(output.followUpQuestions.length), ok: true },
+  ];
 
   return (
     <div className="p-8">
       <div className="mb-7">
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2 font-mono">
-          <span>BVG Berliner Verkehrsbetriebe</span>
+          <span>{client?.name ?? "Client"}</span>
           <span className="text-muted-foreground/50 mx-1">/</span>
-          <span className="text-foreground">
-            Ridership Decline Q1–Q2 2024
-          </span>
+          <span className="text-foreground">{session.title}</span>
         </div>
         <h1
           className="text-2xl font-semibold text-foreground"
@@ -59,7 +83,6 @@ export default function FinalizePage() {
 
       <div className="grid grid-cols-5 gap-6">
         <div className="col-span-3 space-y-5">
-          {/* Recommendation */}
           <div className="bg-card border border-border rounded-[14px] p-6">
             <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">
               Consultant Recommendation
@@ -68,11 +91,11 @@ export default function FinalizePage() {
               value={recommendation}
               onChange={(e) => setRecommendation(e.target.value)}
               rows={7}
+              placeholder="Write your recommendation for the next steps..."
               className="w-full bg-input-background border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none leading-relaxed"
             />
           </div>
 
-          {/* Next step */}
           <div className="bg-card border border-border rounded-[14px] p-6">
             <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">
               Next Step
@@ -105,7 +128,6 @@ export default function FinalizePage() {
             </div>
           </div>
 
-          {/* Save */}
           {saved ? (
             <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-5 py-4">
               <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
@@ -114,7 +136,7 @@ export default function FinalizePage() {
                   Session saved to client history
                 </p>
                 <p className="text-xs text-emerald-600 mt-0.5">
-                  BVG · Ridership Decline Q1–Q2 2024 · 29 Jun 2026
+                  {client?.name ?? "Client"} · {session.title} · {session.date}
                 </p>
               </div>
               <button
@@ -135,7 +157,6 @@ export default function FinalizePage() {
           )}
         </div>
 
-        {/* Summary panel */}
         <div className="col-span-2 space-y-4">
           <div className="bg-card border border-border rounded-[14px] p-5 bg-muted/40">
             <p className="text-[11px] font-mono font-semibold tracking-widest uppercase text-muted-foreground mb-3">
@@ -154,7 +175,7 @@ export default function FinalizePage() {
           </div>
 
           <div className="bg-card border border-border rounded-[14px] p-5">
-            <p className="text-[11px] font-mono font-semibold tracking-widest uppercase text-muted-foreground mb-3">
+            <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-3">
               Output Metrics
             </p>
             <div className="space-y-3">
@@ -178,5 +199,17 @@ export default function FinalizePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function FinalizePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex-1 flex items-center justify-center p-8">
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+      </div>
+    }>
+      <FinalizeInner />
+    </Suspense>
   );
 }

@@ -84,7 +84,7 @@ function ResultsInner() {
             <span className="text-xs font-mono font-semibold text-primary ml-1">{output.confidenceScore}%</span>
           </div>
           <button
-            onClick={() => router.push("/finalize")}
+            onClick={() => router.push(`/finalize?sessionId=${sessionId}`)}
             className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
           >
             Finalise Session
