@@ -36,8 +36,6 @@ export function TopBar() {
       </div>
       <div className="flex items-center gap-3 text-xs text-muted-foreground font-mono">
         <span>Mon 29 Jun 2026</span>
-        <div className="w-px h-3 bg-border" />
-        <span className="text-foreground">Pandata Berlin GmbH</span>
       </div>
     </header>
   );

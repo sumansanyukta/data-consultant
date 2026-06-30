@@ -131,19 +131,7 @@ export default function NewSessionPage() {
                   className="w-full bg-input-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
-              <div>
-                <label className="text-xs font-medium text-foreground block mb-1.5">
-                  Lead consultant
-                </label>
-                <div className="relative">
-                  <select className="w-full appearance-none bg-input-background border border-border rounded-xl px-4 py-3 text-sm text-foreground pr-9 focus:outline-none focus:ring-2 focus:ring-ring">
-                    <option>Lena Fischer — Senior Consultant</option>
-                    <option>Max Brauer — Consultant</option>
-                    <option>Sophia Kern — Lead Analyst</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                </div>
-              </div>
+
               <div>
                 <label className="text-xs font-medium text-foreground block mb-2">
                   Analysis type
@@ -189,7 +177,7 @@ export default function NewSessionPage() {
                 const session = await createSession({
                   clientId,
                   title,
-                  consultant: "Lena Fischer",
+                  consultant: "",
                   analysisType,
                 });
                 router.push(`/intake?sessionId=${session.id}`);

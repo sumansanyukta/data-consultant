@@ -93,22 +93,7 @@ export function Sidebar() {
         </div>
       </nav>
 
-      {/* User */}
-      <div className="border-t border-border px-4 py-4">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-            <span className="text-[12px] font-semibold text-foreground">LF</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[12.5px] font-medium text-foreground truncate">
-              Lena Fischer
-            </p>
-            <p className="text-[11px] text-muted-foreground truncate">
-              Senior Consultant
-            </p>
-          </div>
-        </div>
-      </div>
+
     </aside>
   );
 }

@@ -184,9 +184,7 @@ function IntakeInner() {
     <div className="p-8">
       <div className="mb-7">
         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2 font-mono">
-          <span>Current Client</span>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-foreground">Current Session</span>
+          <span className="text-foreground">New Session</span>
         </div>
         <h1
           className="text-2xl font-semibold text-foreground"
@@ -195,8 +193,7 @@ function IntakeInner() {
           Brief & Data Intake
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Paste the client brief, upload a data sample, and define your
-          analytical objective.
+          Describe what you&apos;re looking for, upload your data, and define your analytical objective.
         </p>
       </div>
 
@@ -206,7 +203,7 @@ function IntakeInner() {
           <div className="bg-card border border-border rounded-[14px] p-6">
             <div className="flex items-center justify-between mb-3">
               <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono">
-                Client Brief
+                Brief
               </p>
               {brief.length > 0 && (
                 <button

@@ -27,7 +27,7 @@ export default function DashboardPage() {
             className="text-2xl font-semibold text-foreground"
             style={{ fontFamily: "var(--font-lora), serif" }}
           >
-            Good morning, Lena.
+            Welcome.
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             {formatDay()} · {statsLoading ? "..." : `${stats?.activeClients ?? 0} active clients`}
