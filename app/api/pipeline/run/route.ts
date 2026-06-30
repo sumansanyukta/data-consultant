@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runPipeline } from "@/lib/pipeline";
 import { saveSessionInput, saveSessionOutput, finalizeSession } from "@/lib/supabase/queries";
+import { getSupabase } from "@/lib/supabase/client";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,6 +21,7 @@ export async function POST(req: NextRequest) {
       fileName,
       storagePath: storagePath ?? `uploads/${sessionId}/${fileName}`,
       briefText,
+      businessGoal,
     });
 
     // Save session input
@@ -57,6 +59,10 @@ export async function POST(req: NextRequest) {
 
     // Mark session as complete
     await finalizeSession(sessionId);
+
+    // Populate session summary field for history view
+    const sb = getSupabase();
+    await sb.from("sessions").update({ summary: output.execSummary.slice(0, 300) }).eq("id", sessionId);
 
     return NextResponse.json({ sessionId, output, profile });
   } catch (error: any) {

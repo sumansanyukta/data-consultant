@@ -150,18 +150,20 @@ export async function getClients(): Promise<Client[]> {
     .from("clients")
     .select("*")
     .order("created_at", { ascending: false });
-
   if (error) throw error;
 
-  const results: Client[] = [];
-  for (const client of clients as ClientRow[]) {
-    const { count } = await getSupabase()
-      .from("sessions")
-      .select("*", { count: "exact", head: true })
-      .eq("client_id", client.id);
-    results.push(toClient(client, count ?? 0));
+  const { data: allSessions } = await getSupabase()
+    .from("sessions")
+    .select("client_id");
+
+  const countMap: Record<string, number> = {};
+  for (const s of (allSessions as { client_id: string }[] | null) ?? []) {
+    countMap[s.client_id] = (countMap[s.client_id] ?? 0) + 1;
   }
-  return results;
+
+  return (clients as ClientRow[]).map((client) =>
+    toClient(client, countMap[client.id] ?? 0)
+  );
 }
 
 export async function getSessions(limit = 50): Promise<Session[]> {
@@ -249,54 +251,6 @@ export async function getClientById(id: string): Promise<Client | null> {
 
 export async function getRecentSessions(limit = 4): Promise<Session[]> {
   return getSessions(limit);
-}
-
-export async function getDashboardStats(): Promise<{
-  activeClients: number;
-  sessionsThisMonth: number;
-  completeSessions: number;
-  draftSessions: number;
-  avgConfidence: number;
-  dataUploads: number;
-}> {
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
-  const { count: clientCount } = await getSupabase()
-    .from("clients")
-    .select("*", { count: "exact", head: true });
-
-  const { data: sessions } = await getSupabase()
-    .from("sessions")
-    .select("*")
-    .gte("created_at", monthStart);
-  const monthSessions = (sessions as SessionRow[]) ?? [];
-  const complete = monthSessions.filter((s) => s.status === "complete").length;
-  const draft = monthSessions.filter((s) => s.status === "draft").length;
-  const avgConf = monthSessions.length
-    ? Math.round(
-        monthSessions.reduce((sum, s) => sum + (s.confidence ?? 0), 0) /
-          monthSessions.length
-      )
-    : 0;
-
-  const { data: inputs } = await getSupabase()
-    .from("session_inputs")
-    .select("data_files")
-    .gte("created_at", monthStart);
-  const uploadCount = (inputs as { data_files: any[] }[] ?? []).reduce(
-    (sum, row) => sum + (row.data_files?.length ?? 0),
-    0
-  );
-
-  return {
-    activeClients: clientCount ?? 0,
-    sessionsThisMonth: monthSessions.length,
-    completeSessions: complete,
-    draftSessions: draft,
-    avgConfidence: avgConf,
-    dataUploads: uploadCount,
-  };
 }
 
 // ── Mutations ──

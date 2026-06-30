@@ -1,15 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Plus, ChevronRight } from "lucide-react";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Plus, ChevronRight, Loader2 } from "lucide-react";
 import { useClients, useSessions } from "@/lib/supabase/hooks";
 
-export default function HistoryPage() {
+function HistoryInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: clients } = useClients();
   const { data: sessions } = useSessions();
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
+
+  useEffect(() => {
+    const clientId = searchParams.get("clientId");
+    if (clientId) {
+      setSelectedClient(clientId);
+    }
+  }, [searchParams]);
 
   const filtered = selectedClient && sessions
     ? sessions.filter((s) => s.clientId === selectedClient)
@@ -121,9 +129,11 @@ export default function HistoryPage() {
                         </span>
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-                      {session.summary}
-                    </p>
+                    {session.summary && (
+                      <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                        {session.summary}
+                      </p>
+                    )}
                     <div className="flex items-center gap-3">
                       <div className="flex-1 max-w-[200px]">
                         <div className="flex items-center gap-2.5">
@@ -162,5 +172,17 @@ export default function HistoryPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function HistoryPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex-1 flex items-center justify-center p-8">
+        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+      </div>
+    }>
+      <HistoryInner />
+    </Suspense>
   );
 }

@@ -64,12 +64,19 @@ export function checkQuality(profile: FileProfile, briefText?: string): DataQual
     flags.push({ severity: "warning", field: "dataset", issue: `Small dataset (${profile.rowCount} rows) — statistical significance may be limited` });
   }
 
-  // Brief-content alignment (basic)
+  // Brief-content alignment
   if (briefText) {
     const lower = briefText.toLowerCase();
-    const mentioned = profile.columns.filter((c) => lower.includes(c.name.toLowerCase()));
-    if (mentioned.length === 0) {
-      flags.push({ severity: "info", field: "brief", issue: "No column names found in brief text — verify the uploaded data matches the brief" });
+    const COMMON_NAMES = new Set(["id", "name", "date", "type", "key", "code", "uuid", "pk", "url"]);
+    const meaningful = profile.columns.filter(
+      (c) => c.name.length >= 4 && !COMMON_NAMES.has(c.name.toLowerCase())
+    );
+    const mentioned = meaningful.filter((c) => {
+      const pattern = c.name.toLowerCase().replace(/[_-]/g, " ");
+      return pattern.length > 0 && lower.includes(pattern);
+    });
+    if (mentioned.length < 2 && meaningful.length > 2) {
+      flags.push({ severity: "info", field: "brief", issue: "Few column names match the brief text — verify the uploaded data corresponds to the stated objective" });
     }
   }
 

@@ -52,19 +52,19 @@ function IntakeInner() {
   const BRIEF_PRESETS = [
     {
       label: "I have data, not sure what to look for",
-      text: "I have a dataset and I want to explore it to find useful insights. I'm looking for trends, outliers, patterns, or anything notable that could inform business decisions. A broad exploratory analysis would be helpful to understand what the data can tell us.",
+      text: "I have a dataset and need to explore it for trends, outliers, and patterns that could inform business decisions. A broad exploratory analysis would help understand what the data can tell us.",
     },
     {
       label: "Why is a metric changing?",
-      text: "We've observed a significant change in a key metric over recent periods and need to understand the root cause. The data covers the relevant timeframe. We want to identify which factors are driving the change and quantify their relative contribution.",
+      text: "We've observed a significant change in a key metric and need to understand the root cause. We want to identify which factors are driving the change and quantify their contribution.",
     },
     {
       label: "Predict an outcome",
-      text: "We have historical data on past outcomes and want to build a predictive view. The goal is to forecast future results based on the patterns in our data, so we can plan and allocate resources more effectively.",
+      text: "We have historical data on past outcomes and want to forecast future results based on the patterns in our data, so we can plan and allocate resources more effectively.",
     },
     {
       label: "Find patterns / segments",
-      text: "We want to segment our data to identify distinct groups or patterns. The goal is to understand natural groupings in the data — whether by customer behaviour, operational performance, or other dimensions — so we can tailor strategies accordingly.",
+      text: "We want to segment our data to identify distinct groups — whether by customer behaviour, operational performance, or other dimensions — so we can tailor strategies accordingly.",
     },
   ];
   const [goal, setGoal] = useState("diagnostic");
@@ -440,9 +440,9 @@ function IntakeInner() {
                 setRunning(false);
               }
             }}
-            disabled={!parsedFile || !csvContent || running}
+            disabled={!parsedFile || !csvContent || running || brief.length < 50}
             className={`w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-colors shadow-sm ${
-              parsedFile && csvContent && !running
+              parsedFile && csvContent && !running && brief.length >= 50
                 ? "bg-primary text-primary-foreground hover:bg-primary/90"
                 : "bg-muted text-muted-foreground cursor-not-allowed"
             }`}

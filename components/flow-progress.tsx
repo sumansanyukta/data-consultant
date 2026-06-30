@@ -5,7 +5,7 @@ const FLOW_STEPS = [
   { id: "intake", label: "Brief & Data" },
   { id: "analysis-running", label: "Analysis" },
   { id: "results", label: "Results" },
-  { id: "finalize", label: "Finalise" },
+  { id: "finalize", label: "Finalize" },
 ] as const;
 
 export type FlowStep = (typeof FLOW_STEPS)[number]["id"];

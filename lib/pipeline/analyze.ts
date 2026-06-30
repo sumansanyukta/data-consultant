@@ -293,12 +293,21 @@ function buildExecSummary(
   signals: string[],
   qualityFlags: DataQualityFlag[],
   confidence: number,
+  businessGoal?: string,
 ): string {
   const { rowCount, columnCount, fileName } = profile;
   const dangerCount = qualityFlags.filter((f) => f.severity === "danger").length;
   const warningCount = qualityFlags.filter((f) => f.severity === "warning").length;
 
-  let summary = `This analysis examined "${fileName}" containing ${rowCount.toLocaleString()} rows across ${columnCount} columns. `;
+  const goalOpeners: Record<string, string> = {
+    diagnostic: "This diagnostic analysis was conducted to identify root causes and explain observed patterns in the data. ",
+    descriptive: "This descriptive analysis provides a structured overview of the dataset to establish a factual baseline for decision-making. ",
+    predictive: "This predictive assessment examines historical patterns to estimate future outcomes and identify forward-looking signals. ",
+    prescriptive: "This prescriptive evaluation explores the data to recommend actions and quantify expected impact of potential interventions. ",
+  };
+
+  let summary = goalOpeners[businessGoal ?? ""] ?? "";
+  summary += `The examination of "${fileName}" covered ${rowCount.toLocaleString()} rows across ${columnCount} columns. `;
 
   if (dangerCount > 0) {
     summary += `${dangerCount} critical data quality ${dangerCount === 1 ? "issue was" : "issues were"} identified that should be reviewed before proceeding. `;
@@ -321,6 +330,7 @@ export function analyze(
   profile: FileProfile,
   qualityFlags: DataQualityFlag[],
   briefText?: string,
+  businessGoal?: string,
 ): PipelineOutput {
   const keySignals = buildKeySignals(profile, qualityFlags);
   const recommendedAnalyses = buildRecommendedAnalyses(profile, qualityFlags);
@@ -328,7 +338,7 @@ export function analyze(
   const dataCompleteness = computeDataCompleteness(profile);
   const followUpQuestions = buildFollowUpQuestions(profile, qualityFlags);
   const assumptions = buildAssumptions(profile);
-  const execSummary = buildExecSummary(profile, keySignals, qualityFlags, confidenceScore);
+  const execSummary = buildExecSummary(profile, keySignals, qualityFlags, confidenceScore, businessGoal);
 
   return {
     execSummary,

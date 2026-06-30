@@ -62,7 +62,7 @@ function SessionDetailInner() {
             {session.title}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {session.consultant} · {session.date}
+            {session.consultant ? `${session.consultant} · ` : ""}{session.date}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -125,7 +125,7 @@ function SessionDetailInner() {
               {[
                 ["Client", client?.name ?? "Unknown"],
                 ["Objective", input?.businessGoal ?? "Diagnostic"],
-                ["Consultant", session.consultant],
+                ...(session.consultant ? [["Consultant", session.consultant] as const] : []),
                 ["Date", session.date],
                 ["Status", session.status.charAt(0).toUpperCase() + session.status.slice(1)],
                 ["Data", fileName],

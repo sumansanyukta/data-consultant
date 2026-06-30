@@ -35,7 +35,7 @@ export function TopBar() {
         )}
       </div>
       <div className="flex items-center gap-3 text-xs text-muted-foreground font-mono">
-        <span>Mon 29 Jun 2026</span>
+        <span>{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short", year: "numeric" })}</span>
       </div>
     </header>
   );

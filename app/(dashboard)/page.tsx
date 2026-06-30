@@ -23,7 +23,10 @@ export default function DashboardPage() {
   const [parsedFile, setParsedFile] = useState<ParsedFile | null>(null);
   const [question, setQuestion] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const [running, setRunning] = useState(false);
+  const [phase, setPhase] = useState("");
+  const [clientName, setClientName] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const handleFile = useCallback(async (file: File) => {
@@ -36,6 +39,8 @@ export default function DashboardPage() {
     try {
       const text = await file.text();
       const result = Papa.parse(text, { header: true, skipEmptyLines: true });
+      const derivedName = file.name.replace(/\.csv$/i, "").replace(/[_-]/g, " ");
+      setClientName(derivedName);
       setParsedFile({
         fileName: file.name,
         rowCount: result.data.length,
@@ -64,10 +69,11 @@ export default function DashboardPage() {
   const runAnalysis = async () => {
     if (!parsedFile) return;
     setRunning(true);
+    setPhase("Creating client…");
     setError(null);
     try {
       const sb = getSupabase();
-      const projectName = parsedFile.fileName.replace(/\.csv$/i, "").replace(/[_-]/g, " ");
+      const projectName = clientName.trim() || parsedFile.fileName.replace(/\.csv$/i, "").replace(/[_-]/g, " ");
 
       const { data: client, error: ce } = await sb
         .from("clients")
@@ -76,6 +82,7 @@ export default function DashboardPage() {
         .single();
       if (ce) throw ce;
 
+      setPhase("Creating session…");
       const session = await createSession({
         clientId: client.id,
         title: projectName,
@@ -83,12 +90,14 @@ export default function DashboardPage() {
         analysisType: ["Descriptive"],
       });
 
+      setPhase("Uploading data…");
       const storagePath = `uploads/${session.id}/${parsedFile.fileName}`;
       const { error: ue } = await sb.storage
         .from("client-uploads")
         .upload(storagePath, new Blob([parsedFile.csvContent], { type: "text/csv" }), { upsert: true });
       if (ue) throw ue;
 
+      setPhase("Running analysis…");
       const res = await fetch("/api/pipeline/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -138,7 +147,7 @@ export default function DashboardPage() {
                     {parsedFile.rowCount.toLocaleString()} rows · {parsedFile.columnCount} columns · {parsedFile.sizeKb} KB
                   </p>
                 </div>
-                <button onClick={() => { setParsedFile(null); setError(null); }}
+                <button onClick={() => { setParsedFile(null); setClientName(""); setError(null); }}
                   className="flex-shrink-0 p-1 rounded-lg hover:bg-emerald-100 transition-colors">
                   <X className="w-4 h-4 text-emerald-600" />
                 </button>
@@ -148,6 +157,13 @@ export default function DashboardPage() {
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="What question are you trying to answer? (optional)"
+                className="w-full bg-input-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+
+              <input
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+                placeholder="Client / project name"
                 className="w-full bg-input-background border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
 
@@ -161,7 +177,10 @@ export default function DashboardPage() {
                 }`}
               >
                 {running ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {phase}
+                  </>
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4" />
@@ -172,10 +191,15 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div
-              onDragOver={(e) => { e.preventDefault(); }}
-              onDrop={onDrop}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={(e) => { setDragOver(false); onDrop(e); }}
               onClick={() => document.getElementById("csv-upload")?.click()}
-              className="border-2 border-dashed rounded-xl p-10 text-center cursor-pointer hover:border-primary/40 hover:bg-muted/40 transition-colors"
+              className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${
+                dragOver
+                  ? "border-primary bg-accent"
+                  : "hover:border-primary/40 hover:bg-muted/40 border-border"
+              }`}
             >
               {uploading ? (
                 <div>

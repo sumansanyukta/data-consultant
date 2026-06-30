@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Save, Loader2 } from "lucide-react";
 import { useSessionDetail } from "@/lib/supabase/hooks";
+import { finalizeSession, addConsultantNote } from "@/lib/supabase/queries";
 
 const nextSteps = [
   { id: "workshop", label: "Schedule stakeholder workshop" },
@@ -19,6 +20,7 @@ function FinalizeInner() {
   const { data, loading } = useSessionDetail(sessionId);
   const [nextStep, setNextStep] = useState("workshop");
   const [recommendation, setRecommendation] = useState("");
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   if (loading) {
@@ -74,7 +76,7 @@ function FinalizeInner() {
           className="text-2xl font-semibold text-foreground"
           style={{ fontFamily: "var(--font-lora), serif" }}
         >
-          Finalise Session
+          Finalize Session
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
           Review outputs, write a recommendation, and save to client history.
@@ -148,11 +150,37 @@ function FinalizeInner() {
             </div>
           ) : (
             <button
-              onClick={() => setSaved(true)}
-              className="flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm"
+              onClick={async () => {
+                setSaving(true);
+                try {
+                  await finalizeSession(sessionId, "complete");
+                  if (recommendation.trim()) {
+                    await addConsultantNote(sessionId, `Recommendation: ${recommendation.trim()}`);
+                  }
+                  const stepLabel = nextSteps.find((s) => s.id === nextStep)?.label;
+                  if (stepLabel) {
+                    await addConsultantNote(sessionId, `Next step: ${stepLabel}`);
+                  }
+                  setSaved(true);
+                } catch (e) {
+                  console.error("Failed to save session", e);
+                } finally {
+                  setSaving(false);
+                }
+              }}
+              disabled={saving}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-colors shadow-sm ${
+                saving
+                  ? "bg-muted text-muted-foreground cursor-not-allowed"
+                  : "bg-primary text-primary-foreground hover:bg-primary/90"
+              }`}
             >
-              <Save className="w-4 h-4" />
-              Save Session to Client History
+              {saving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              {saving ? "Saving..." : "Save Session to Client History"}
             </button>
           )}
         </div>

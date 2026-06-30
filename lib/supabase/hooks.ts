@@ -58,6 +58,4 @@ export function useRecentSessions(limit = 4) {
   return useFetch(() => q.getRecentSessions(limit), [limit]);
 }
 
-export function useDashboardStats() {
-  return useFetch(() => q.getDashboardStats());
-}
+
