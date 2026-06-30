@@ -1,4 +1,4 @@
-import { supabase } from "./client";
+import { getSupabase } from "./client";
 import type { Client, Session, SessionInput, SessionOutput, ConsultantNote } from "@/types";
 import type { PostgrestError } from "@supabase/supabase-js";
 
@@ -146,7 +146,7 @@ function formatDate(dateStr: string): string {
 // ── Queries ──
 
 export async function getClients(): Promise<Client[]> {
-  const { data: clients, error } = await supabase
+  const { data: clients, error } = await getSupabase()
     .from("clients")
     .select("*")
     .order("created_at", { ascending: false });
@@ -155,7 +155,7 @@ export async function getClients(): Promise<Client[]> {
 
   const results: Client[] = [];
   for (const client of clients as ClientRow[]) {
-    const { count } = await supabase
+    const { count } = await getSupabase()
       .from("sessions")
       .select("*", { count: "exact", head: true })
       .eq("client_id", client.id);
@@ -165,7 +165,7 @@ export async function getClients(): Promise<Client[]> {
 }
 
 export async function getSessions(limit = 50): Promise<Session[]> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("sessions")
     .select("*")
     .order("created_at", { ascending: false })
@@ -176,7 +176,7 @@ export async function getSessions(limit = 50): Promise<Session[]> {
 }
 
 export async function getSessionsByClient(clientId: string): Promise<Session[]> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("sessions")
     .select("*")
     .eq("client_id", clientId)
@@ -193,7 +193,7 @@ export async function getSessionById(id: string): Promise<{
   notes: ConsultantNote[];
   client: Client | null;
 }> {
-  const { data: s, error: se } = await supabase
+  const { data: s, error: se } = await getSupabase()
     .from("sessions")
     .select("*")
     .eq("id", id)
@@ -201,28 +201,28 @@ export async function getSessionById(id: string): Promise<{
   if (se) throw se;
   const session = toSession(s as SessionRow);
 
-  const { data: inp } = await supabase
+  const { data: inp } = await getSupabase()
     .from("session_inputs")
     .select("*")
     .eq("session_id", id)
     .single();
   const input = inp ? toSessionInput(inp as SessionInputRow) : null;
 
-  const { data: out } = await supabase
+  const { data: out } = await getSupabase()
     .from("session_outputs")
     .select("*")
     .eq("session_id", id)
     .single();
   const output = out ? toSessionOutput(out as SessionOutputRow) : null;
 
-  const { data: notes } = await supabase
+  const { data: notes } = await getSupabase()
     .from("consultant_notes")
     .select("*")
     .eq("session_id", id)
     .order("created_at", { ascending: false });
   const cnotes = (notes as ConsultantNoteRow[] | null)?.map(toConsultantNote) ?? [];
 
-  const { data: c } = await supabase
+  const { data: c } = await getSupabase()
     .from("clients")
     .select("*")
     .eq("id", session.clientId)
@@ -233,14 +233,14 @@ export async function getSessionById(id: string): Promise<{
 }
 
 export async function getClientById(id: string): Promise<Client | null> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("clients")
     .select("*")
     .eq("id", id)
     .single();
   if (error) throw error;
   const row = data as ClientRow;
-  const { count } = await supabase
+  const { count } = await getSupabase()
     .from("sessions")
     .select("*", { count: "exact", head: true })
     .eq("client_id", row.id);
@@ -262,11 +262,11 @@ export async function getDashboardStats(): Promise<{
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
-  const { count: clientCount } = await supabase
+  const { count: clientCount } = await getSupabase()
     .from("clients")
     .select("*", { count: "exact", head: true });
 
-  const { data: sessions } = await supabase
+  const { data: sessions } = await getSupabase()
     .from("sessions")
     .select("*")
     .gte("created_at", monthStart);
@@ -280,7 +280,7 @@ export async function getDashboardStats(): Promise<{
       )
     : 0;
 
-  const { data: inputs } = await supabase
+  const { data: inputs } = await getSupabase()
     .from("session_inputs")
     .select("data_files")
     .gte("created_at", monthStart);
@@ -309,7 +309,7 @@ interface CreateSessionInput {
 }
 
 export async function createSession(input: CreateSessionInput): Promise<Session> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("sessions")
     .insert({
       client_id: input.clientId,
@@ -334,7 +334,7 @@ export async function saveSessionInput(
     dataFiles: any[];
   }
 ): Promise<SessionInput> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("session_inputs")
     .upsert({
       session_id: sessionId,
@@ -353,7 +353,7 @@ export async function finalizeSession(
   sessionId: string,
   status: "complete" = "complete"
 ): Promise<void> {
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from("sessions")
     .update({ status })
     .eq("id", sessionId);
@@ -364,7 +364,7 @@ export async function addConsultantNote(
   sessionId: string,
   noteText: string
 ): Promise<ConsultantNote> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("consultant_notes")
     .insert({ session_id: sessionId, note_text: noteText })
     .select()
