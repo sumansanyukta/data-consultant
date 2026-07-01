@@ -24,12 +24,39 @@ export default function NewSessionPage() {
     ? `${client.name} — ${analysisType.join(" & ")} Review`
     : "";
 
-  function handleSample() {
+  async function handleSample() {
     setMode("loading");
-    fetch("/api/session/sample", { method: "POST" })
-      .then((r) => r.json())
-      .then(({ sessionId }) => router.push(`/intake?sessionId=${sessionId}&sample=true`))
-      .catch(() => setMode("choose"));
+    try {
+      // Create session + upload CSV to storage
+      const { sessionId, storagePath } = await fetch("/api/session/sample", { method: "POST" }).then((r) => r.json());
+
+      // Fetch CSV content
+      const csvContent = await fetch("/api/session/sample").then((r) => r.text());
+
+      // Run pipeline directly
+      const res = await fetch("/api/pipeline/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          csvContent,
+          fileName: "sample-data.csv",
+          storagePath,
+          briefText:
+            "Our e-commerce client has provided a transaction dataset covering Q4 2025 through mid-January 2026. " +
+            "We need to assess overall sales performance, identify top-performing product categories and regions, " +
+            "understand customer segment behaviour, and detect any quality issues in the data. " +
+            "The goal is to produce a diagnostic review with actionable recommendations for improving revenue and customer retention.",
+          businessGoal: "diagnostic",
+        }),
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+      router.push(`/analysis-running?sessionId=${sessionId}`);
+    } catch (e) {
+      console.error("Sample session failed", e);
+      setMode("choose");
+    }
   }
 
   async function handleStartFresh() {
