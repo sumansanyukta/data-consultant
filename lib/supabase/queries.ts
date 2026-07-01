@@ -302,7 +302,7 @@ export async function saveSessionInput(
       business_goal: input.businessGoal,
       constraints: input.constraints,
       data_files: input.dataFiles,
-    })
+    }, { onConflict: 'session_id' })
     .select()
     .single();
   if (error) throw error;
@@ -351,7 +351,7 @@ export async function saveSessionOutput(
       stat_summary: output.statSummary ?? null,
       tasks: output.tasks ?? null,
       suggested_kpis: output.suggestedKpis ?? null,
-    })
+    }, { onConflict: 'session_id' })
     .select()
     .single();
   if (error) throw error;
