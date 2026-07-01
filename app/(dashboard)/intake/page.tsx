@@ -81,7 +81,8 @@ function IntakeInner() {
   const isSample = searchParams.get("sample") === "true";
   const sampleLoaded = useRef(false);
 
-  const [step, setStep] = useState(1);
+  const initialStep = searchParams.get("step") ? Number(searchParams.get("step")) : 1;
+  const [step, setStep] = useState(initialStep);
   const [brief, setBrief] = useState("");
   const [goal, setGoal] = useState("diagnostic");
   const [parsedFile, setParsedFile] = useState<ParsedFile | null>(null);

@@ -12,12 +12,13 @@ const types = ["Descriptive", "Diagnostic", "Predictive", "Prescriptive"];
 export default function NewSessionPage() {
   const router = useRouter();
   const { data: clients, refetch: refetchClients } = useClients();
-  const [mode, setMode] = useState<"choose" | "fresh" | "loading">("choose");
+  const [mode, setMode] = useState<"choose" | "fresh" | "loading" | "sample-ready">("choose");
   const [selectedClient, setSelectedClient] = useState("");
   const [analysisType, setAnalysisType] = useState<string[]>(["Descriptive"]);
   const [creating, setCreating] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [customTitle, setCustomTitle] = useState("");
+  const [sampleSessionId, setSampleSessionId] = useState<string | null>(null);
 
   const clientList = useMemo(() => clients ?? [], [clients]);
   const client = clientList.find((c) => c.id === selectedClient);
@@ -32,7 +33,10 @@ export default function NewSessionPage() {
     setMode("loading");
     fetch("/api/session/sample", { method: "POST" })
       .then((r) => r.json())
-      .then(({ sessionId }) => router.push(`/intake?sessionId=${sessionId}&sample=true`))
+      .then(({ sessionId }) => {
+        setSampleSessionId(sessionId);
+        setMode("sample-ready");
+      })
       .catch(() => setMode("choose"));
   }
 
@@ -257,6 +261,33 @@ export default function NewSessionPage() {
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 className="w-6 h-6 text-primary animate-spin mb-4" />
           <p className="text-sm text-muted-foreground">Setting up your sample session…</p>
+        </div>
+      )}
+
+      {mode === "sample-ready" && (
+        <div className="animate-in fade-in duration-300">
+          <div className="text-center mb-8">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-50/80 to-emerald-50/20 border border-emerald-200/50 flex items-center justify-center mx-auto mb-4">
+              <Check className="w-6 h-6 text-emerald-600" />
+            </div>
+            <h1
+              className="text-xl font-semibold text-foreground mb-1.5"
+              style={{ fontFamily: "var(--font-lora), serif" }}
+            >
+              Sample data loaded
+            </h1>
+            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+              A 151-row retail e-commerce dataset is ready. We&apos;ve drafted a brief — review it, then run the analysis.
+            </p>
+          </div>
+
+          <button
+            onClick={() => router.push(`/intake?sessionId=${sampleSessionId}&sample=true&step=3`)}
+            className="w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-xl text-sm font-medium hover:bg-primary/90 transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
+          >
+            Continue to review
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       )}
     </div>
