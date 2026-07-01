@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, History, ChevronRight, ArrowRight, Loader2, Eye } from "lucide-react";
+import { Plus, History, ChevronRight, ArrowRight } from "lucide-react";
 import { LogoIcon } from "@/components/logo";
 import { useClients, useSessions } from "@/lib/supabase/hooks";
 
@@ -11,7 +10,6 @@ export default function DashboardPage() {
   const router = useRouter();
   const { data: sessions } = useSessions(5);
   const { data: clients } = useClients();
-  const [sampleLoading, setSampleLoading] = useState(false);
 
   const stats = [
     { label: "Sessions", value: sessions?.length ?? 0 },
@@ -50,31 +48,6 @@ export default function DashboardPage() {
           >
             <History className="w-4 h-4" />
             Browse History
-          </button>
-        </div>
-        <div className="flex items-center justify-center gap-3 mt-6">
-          <button
-            onClick={async () => {
-              setSampleLoading(true);
-              try {
-                const res = await fetch("/api/session/sample", { method: "POST" });
-                if (!res.ok) throw new Error(await res.text());
-                const { sessionId } = await res.json();
-                router.push(`/intake?sessionId=${sessionId}&sample=true`);
-              } catch (e) {
-                console.error("Sample session failed", e);
-                setSampleLoading(false);
-              }
-            }}
-            disabled={sampleLoading}
-            className="inline-flex items-center gap-2 bg-card border border-border text-foreground px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-muted transition-colors shadow-sm"
-          >
-            {sampleLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Eye className="w-4 h-4" />
-            )}
-            {sampleLoading ? "Setting up..." : "Try with sample data"}
           </button>
         </div>
       </div>
