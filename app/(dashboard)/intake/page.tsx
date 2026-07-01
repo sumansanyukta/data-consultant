@@ -7,10 +7,10 @@ import {
   Upload,
   CheckCircle2,
   AlertCircle,
-  Sparkles,
   X,
   FileText,
   Loader2,
+  BarChart3,
 } from "lucide-react";
 import Papa from "papaparse";
 import { getSupabase } from "@/lib/supabase/client";
@@ -451,7 +451,7 @@ function IntakeInner() {
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <>
-                <Sparkles className="w-4 h-4" />
+                <BarChart3 className="w-4 h-4" />
                 Run Analysis
               </>
             )}

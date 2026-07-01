@@ -84,10 +84,8 @@ export function Sidebar() {
               href={"/history?clientId=" + c.id}
               className="w-full flex items-center gap-2.5 px-3 py-2 rounded-[10px] text-[12.5px] text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-150"
             >
-              <div className="w-5 h-5 rounded-md bg-secondary flex items-center justify-center flex-shrink-0 text-[10px] font-semibold text-muted-foreground">
-                {c.name.charAt(0)}
-              </div>
-              <span className="truncate">{c.name.split(" ")[0]}</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-primary/40 flex-shrink-0" />
+              <span className="truncate">{c.name}</span>
             </Link>
           ))}
           {(clients ?? []).length > 6 && (

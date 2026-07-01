@@ -47,10 +47,27 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --shadow-card: 0 1px 3px rgba(26,25,23,0.04), 0 1px 2px rgba(26,25,23,0.02);
+  --shadow-card-hover: 0 4px 12px rgba(26,25,23,0.06), 0 2px 4px rgba(26,25,23,0.03);
 }
+
+@layer utilities {
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  .shadow-card-hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+}
+
 
 * {
   border-color: var(--border);
+}
+
+/* Card shadow */
+.bg-card {
+  box-shadow: var(--shadow-card);
 }
 
 html {

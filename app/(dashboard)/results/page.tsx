@@ -16,7 +16,6 @@ import {
   Database,
   BarChart3,
   Shield,
-  Sparkles,
 } from "lucide-react";
 import { useSessionDetail } from "@/lib/supabase/hooks";
 import { addConsultantNote } from "@/lib/supabase/queries";
@@ -317,8 +316,7 @@ function ResultsInner() {
               <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Key Signals</p>
               <div className="flex flex-wrap gap-1.5">
                 {signals.slice(0, 6).map((s, i) => (
-                  <span key={i} className="inline-flex items-center gap-1 text-[11px] bg-accent text-accent-foreground px-2.5 py-1 rounded-lg font-medium leading-snug">
-                    <Sparkles className="w-3 h-3 text-primary flex-shrink-0" />
+                  <span key={i} className="text-[11px] bg-accent text-accent-foreground px-2.5 py-1 rounded-lg font-medium leading-snug">
                     {s}
                   </span>
                 ))}

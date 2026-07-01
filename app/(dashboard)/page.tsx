@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, History, Database, ChevronRight, ArrowRight, Sparkles } from "lucide-react";
+import { Plus, History, Database, ChevronRight, ArrowRight } from "lucide-react";
 import { useClients, useSessions } from "@/lib/supabase/hooks";
 
 export default function DashboardPage() {
@@ -55,8 +55,8 @@ export default function DashboardPage() {
       {(!sessions || sessions.length === 0) && (
         <div className="max-w-lg mx-auto mt-4">
           <div className="bg-card border border-border rounded-[14px] p-8 text-center">
-            <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center mx-auto mb-3">
-              <Sparkles className="w-5 h-5 text-primary" />
+            <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center mx-auto mb-3">
+              <Database className="w-5 h-5 text-muted-foreground" />
             </div>
             <p className="text-sm font-medium text-foreground mb-1">No analyses yet</p>
             <p className="text-xs text-muted-foreground">
