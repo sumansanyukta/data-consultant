@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Loader2, Upload, Eye, Plus, Building2, Pencil, Check } from "lucide-react";
+import { ArrowRight, Loader2, Upload, Eye, Plus, Building2, Check } from "lucide-react";
 import { useClients } from "@/lib/supabase/hooks";
 import { createSession } from "@/lib/supabase/queries";
 import { getSupabase } from "@/lib/supabase/client";
@@ -16,18 +16,9 @@ export default function NewSessionPage() {
   const [selectedClient, setSelectedClient] = useState("");
   const [analysisType, setAnalysisType] = useState<string[]>(["Descriptive"]);
   const [creating, setCreating] = useState(false);
-  const [editingTitle, setEditingTitle] = useState(false);
-  const [customTitle, setCustomTitle] = useState("");
   const [sampleSessionId, setSampleSessionId] = useState<string | null>(null);
 
   const clientList = useMemo(() => clients ?? [], [clients]);
-  const client = clientList.find((c) => c.id === selectedClient);
-
-  const generatedTitle = client
-    ? `${client.name} — ${analysisType.join(" & ")} Review`
-    : "";
-
-  const sessionTitle = customTitle || generatedTitle;
 
   function handleSample() {
     setMode("loading");
@@ -44,9 +35,10 @@ export default function NewSessionPage() {
     if (!selectedClient) return;
     setCreating(true);
     try {
+      const client = clientList.find((c) => c.id === selectedClient);
       const session = await createSession({
         clientId: selectedClient,
-        title: sessionTitle,
+        title: client?.name ?? "New Analysis",
         consultant: "",
         analysisType,
       });
@@ -208,31 +200,6 @@ export default function NewSessionPage() {
                   </button>
                 ))}
               </div>
-              {generatedTitle && (
-                <div className="mt-4 bg-muted/50 rounded-xl px-4 py-3">
-                  <div className="flex items-center justify-between mb-0.5">
-                    <p className="text-[11px] text-muted-foreground font-mono">Session title</p>
-                    <button
-                      onClick={() => { setEditingTitle(!editingTitle); if (!editingTitle) setCustomTitle(generatedTitle); }}
-                      className="text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-                    >
-                      {editingTitle ? <Check className="w-3 h-3" /> : <Pencil className="w-3 h-3" />}
-                      {editingTitle ? "Done" : "Edit"}
-                    </button>
-                  </div>
-                  {editingTitle ? (
-                    <input
-                      type="text"
-                      value={customTitle}
-                      onChange={(e) => setCustomTitle(e.target.value)}
-                      className="w-full bg-card border border-border rounded-lg px-3 py-1.5 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                      autoFocus
-                    />
-                  ) : (
-                    <p className="text-sm font-medium text-foreground">{sessionTitle}</p>
-                  )}
-                </div>
-              )}
             </div>
 
             <button
