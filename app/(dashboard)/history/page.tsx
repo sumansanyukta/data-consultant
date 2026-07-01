@@ -123,8 +123,22 @@ function HistoryInner() {
 
       {/* Sessions grouped by date */}
       {grouped.length === 0 && (
-        <div className="bg-card border border-border rounded-2xl p-10 text-center">
-          <p className="text-sm text-muted-foreground">No sessions yet.</p>
+        <div className="bg-card border border-border rounded-[14px] p-10 text-center">
+          {selectedClient ? (
+            <div>
+              <p className="text-sm text-foreground font-medium mb-1">No sessions for this client</p>
+              <p className="text-xs text-muted-foreground">
+                {clients?.find((c) => c.id === selectedClient)?.name ?? "Client"} has no completed analyses yet.
+              </p>
+            </div>
+          ) : (
+            <div>
+              <p className="text-sm text-foreground font-medium mb-1">No sessions yet</p>
+              <p className="text-xs text-muted-foreground">
+                Start a new session to upload data and run your first analysis.
+              </p>
+            </div>
+          )}
         </div>
       )}
 

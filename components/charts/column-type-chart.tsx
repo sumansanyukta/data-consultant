@@ -18,42 +18,56 @@ export function ColumnTypeChart({ data }: Props) {
 
   if (total === 0) {
     return (
-      <div className="flex items-center justify-center h-32 text-xs text-muted-foreground">
-        No column data
+      <div className="flex items-center justify-center h-20 text-xs text-muted-foreground">
+        No type data
       </div>
     );
   }
 
   return (
-    <div className="w-full h-44">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={data}
-            dataKey="count"
-            nameKey="type"
-            cx="50%"
-            cy="50%"
-            innerRadius={36}
-            outerRadius={56}
-            strokeWidth={0}
-          >
-            {data.map((d) => (
-              <Cell key={d.type} fill={COLORS[d.type] ?? "#B0ADAA"} />
-            ))}
-          </Pie>
-          <Legend
-            verticalAlign="bottom"
-            iconType="circle"
-            iconSize={6}
-            formatter={(value: string) => (
-              <span style={{ fontSize: 10, fontFamily: "var(--font-jetbrains)", color: "#7A776F" }}>
-                {value} ({data.find((d) => d.type === value)?.count ?? 0})
-              </span>
-            )}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+    <div className="flex items-center gap-5">
+      <div className="w-28 h-28 flex-shrink-0">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              dataKey="count"
+              nameKey="type"
+              cx="50%"
+              cy="50%"
+              innerRadius={24}
+              outerRadius={40}
+              strokeWidth={0}
+            >
+              {data.map((d) => (
+                <Cell key={d.type} fill={COLORS[d.type] ?? "#B0ADAA"} />
+              ))}
+            </Pie>
+            <Legend
+              verticalAlign="bottom"
+              iconType="circle"
+              iconSize={6}
+              formatter={(value: string) => (
+                <span style={{ fontSize: 10, fontFamily: "var(--font-jetbrains)", color: "#7A776F" }}>
+                  {value} ({data.find((d) => d.type === value)?.count ?? 0})
+                </span>
+              )}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="text-[11px] font-mono space-y-1 text-muted-foreground">
+        {data.map((d) => (
+          <div key={d.type} className="flex items-center gap-2">
+            <span
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ backgroundColor: COLORS[d.type] ?? "#B0ADAA" }}
+            />
+            <span>{d.type}</span>
+            <span className="text-foreground font-semibold">{d.count}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

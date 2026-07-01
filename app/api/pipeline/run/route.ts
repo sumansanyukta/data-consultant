@@ -112,9 +112,12 @@ export async function POST(req: NextRequest) {
     // Mark session as complete
     await finalizeSession(sessionId);
 
-    // Populate session summary field for history view
+    // Populate session summary and confidence for dashboard
     const sb = getSupabase();
-    await sb.from("sessions").update({ summary: output.execSummary.slice(0, 300) }).eq("id", sessionId);
+    await sb.from("sessions").update({
+      summary: output.execSummary.slice(0, 300),
+      confidence: output.confidenceScore,
+    }).eq("id", sessionId);
 
     return NextResponse.json({ sessionId, output, profile, stats });
   } catch (error: any) {

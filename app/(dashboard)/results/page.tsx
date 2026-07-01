@@ -139,10 +139,10 @@ function ResultsInner() {
         <div className="flex items-center gap-2.5">
           <button onClick={downloadReport} className="flex items-center gap-1.5 bg-card border border-border text-foreground px-3.5 py-2 rounded-xl text-xs font-medium hover:bg-muted transition-colors">
             <Download className="w-3.5 h-3.5" />
-            Download
+            Export report
           </button>
           <button onClick={() => router.push(`/next-steps?sessionId=${sessionId}`)} className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3.5 py-2 rounded-xl text-xs font-medium hover:bg-primary/90 transition-colors">
-            Next Steps
+            View tasks
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>

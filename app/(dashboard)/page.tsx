@@ -11,11 +11,29 @@ export default function DashboardPage() {
   const { data: sessions } = useSessions(5);
   const { data: clients } = useClients();
 
+  function timeAgo(dateStr: string): string {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days === 0) return "today";
+    if (days === 1) return "yesterday";
+    if (days < 7) return `${days} days ago`;
+    const weeks = Math.floor(days / 7);
+    if (weeks <= 4) return `${weeks}w ago`;
+    return `${Math.floor(days / 30)}mo ago`;
+  }
+
   const stats = [
     { label: "Sessions", value: sessions?.length ?? 0 },
     { label: "Clients", value: clients?.length ?? 0 },
-    ...(sessions?.[0] ? [{ label: "Latest", value: sessions[0].date }] : []),
+    ...(sessions?.[0]
+      ? [{ label: "Last analysis", value: `Today` }]
+      : []),
   ];
+
+  const lastAnalysisDate = sessions?.[0]?.date;
+  if (lastAnalysisDate) {
+    stats[2] = { label: "Last analysis", value: timeAgo(lastAnalysisDate) };
+  }
 
   return (
     <div className="p-8">
