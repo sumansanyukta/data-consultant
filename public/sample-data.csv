@@ -1,0 +1,152 @@
+order_id,date,customer_id,customer_segment,product_category,product_name,unit_price,quantity,total,region,payment_method,rating,returned,marketing_channel
+ORD-001,2025-11-01,CUST-001,Returning,Electronics,Wireless Headphones,89.99,2,179.98,North,Card,4,No,Email
+ORD-002,2025-11-01,CUST-002,New,Clothing,Cotton T-Shirt,24.99,3,74.97,South,Card,5,No,Social Media
+ORD-003,2025-11-02,CUST-003,Loyal,Home & Garden,Ceramic Plant Pot,34.50,1,34.50,East,Cash,3,No,Organic Search
+ORD-004,2025-11-02,CUST-004,VIP,Electronics,Laptop Stand,45.00,1,45.00,North,Card,4,No,Direct
+ORD-005,2025-11-03,CUST-005,New,Clothing,Denim Jacket,89.99,1,89.99,West,Card,,Yes,Social Media
+ORD-006,2025-11-03,CUST-006,Returning,Books,Data Science Handbook,54.99,1,54.99,East,PayPal,5,No,Email
+ORD-007,2025-11-04,CUST-007,Loyal,Electronics,USB-C Hub,39.99,2,79.98,North,Card,4,No,Organic Search
+ORD-008,2025-11-04,CUST-008,New,Sports & Outdoors,Yoga Mat,29.99,1,29.99,South,Cash,3,No,Social Media
+ORD-009,2025-11-05,CUST-009,VIP,Home & Garden,Smart Thermostat,149.99,1,149.99,East,Card,5,No,Direct
+ORD-010,2025-11-05,CUST-010,Returning,Clothing,Wool Scarf,39.99,2,79.98,North,PayPal,4,No,Email
+ORD-011,2025-11-06,CUST-011,New,Electronics,Bluetooth Speaker,59.99,1,59.99,West,Card,3,Yes,Social Media
+ORD-012,2025-11-06,CUST-012,Loyal,Books,Leadership & Strategy,42.00,1,42.00,South,Card,5,No,Email
+ORD-013,2025-11-07,CUST-013,New,Sports & Outdoors,Running Shoes,129.99,1,129.99,North,Cash,4,No,Organic Search
+ORD-014,2025-11-07,CUST-014,VIP,Home & Garden,Standing Desk,499.99,1,499.99,West,Card,5,No,Direct
+ORD-015,2025-11-08,CUST-015,Returning,Electronics,Webcam HD,79.99,1,79.99,East,Card,4,No,Email
+ORD-016,2025-11-08,CUST-016,Loyal,Clothing,Leather Belt,49.99,1,49.99,North,PayPal,4,No,Organic Search
+ORD-017,2025-11-09,CUST-017,New,Books,The Art of Statistics,34.99,1,34.99,South,Card,,No,Social Media
+ORD-018,2025-11-09,CUST-018,VIP,Electronics,Mechanical Keyboard,169.99,1,169.99,West,Card,5,No,Direct
+ORD-019,2025-11-10,CUST-019,Returning,Sports & Outdoors,Dumbbell Set,89.99,2,179.98,East,Cash,4,No,Email
+ORD-020,2025-11-10,CUST-020,New,Home & Garden,Indoor Plant Set,44.99,1,44.99,North,Card,3,No,Social Media
+ORD-021,2025-11-11,CUST-021,Loyal,Electronics,Wireless Mouse,29.99,3,89.97,South,Card,4,No,Organic Search
+ORD-022,2025-11-11,CUST-001,Returning,Clothing,Cashmere Sweater,119.99,1,119.99,North,Card,5,No,Email
+ORD-023,2025-11-12,CUST-022,New,Books,Predictive Analytics,67.99,1,67.99,East,PayPal,4,No,Social Media
+ORD-024,2025-11-12,CUST-023,VIP,Electronics,4K Monitor,699.99,1,699.99,West,Card,5,No,Direct
+ORD-025,2025-11-13,CUST-024,Returning,Sports & Outdoors,Resistance Bands,19.99,3,59.97,North,Cash,3,No,Email
+ORD-026,2025-11-13,CUST-025,New,Home & Garden,Bamboo Shelving,89.99,1,89.99,South,Card,,Yes,Social Media
+ORD-027,2025-11-14,CUST-026,Loyal,Electronics,Tablet Stand,24.99,2,49.98,East,Card,4,No,Organic Search
+ORD-028,2025-11-14,CUST-027,VIP,Clothing,Designer Sunglasses,249.99,1,249.99,West,Card,5,No,Direct
+ORD-029,2025-11-15,CUST-028,New,Books,Data Visualization Guide,44.99,1,44.99,North,PayPal,3,No,Social Media
+ORD-030,2025-11-15,CUST-029,Returning,Electronics,Smartwatch,299.99,1,299.99,South,Card,4,No,Email
+ORD-031,2025-11-16,CUST-030,Loyal,Sports & Outdoors,Cycling Helmet,69.99,1,69.99,East,Card,5,No,Organic Search
+ORD-032,2025-11-16,CUST-031,VIP,Home & Garden,Ergonomic Chair,899.99,1,899.99,West,Card,5,No,Direct
+ORD-033,2025-11-17,CUST-032,New,Electronics,Portable Charger,49.99,1,49.99,North,Cash,4,No,Social Media
+ORD-034,2025-11-17,CUST-033,Returning,Clothing,Summer Dress,64.99,1,64.99,East,Card,3,No,Email
+ORD-035,2025-11-18,CUST-034,Loyal,Books,Financial Analysis,58.00,1,58.00,South,PayPal,4,No,Organic Search
+ORD-036,2025-11-18,CUST-035,New,Home & Garden,LED Desk Lamp,39.99,2,79.98,West,Card,4,No,Social Media
+ORD-037,2025-11-19,CUST-036,VIP,Electronics,Noise Cancelling Headphones,349.99,1,349.99,North,Card,5,No,Direct
+ORD-038,2025-11-19,CUST-037,Returning,Sports & Outdoors,Treadmill,2499.99,1,2499.99,East,Card,4,No,Email
+ORD-039,2025-11-20,CUST-038,New,Clothing,Formal Blazer,159.99,1,159.99,South,Card,2,Yes,Social Media
+ORD-040,2025-11-20,CUST-039,Loyal,Books,Machine Learning Basics,72.99,1,72.99,West,Cash,5,No,Organic Search
+ORD-041,2025-11-21,CUST-040,VIP,Home & Garden,Smart Lighting Kit,129.99,2,259.98,North,Card,4,No,Direct
+ORD-042,2025-11-21,CUST-041,New,Electronics,Gaming Mouse,79.99,1,79.99,East,PayPal,4,No,Social Media
+ORD-043,2025-11-22,CUST-042,Returning,Clothing,Wool Coat,299.99,1,299.99,West,Card,5,No,Email
+ORD-044,2025-11-22,CUST-043,Loyal,Sports & Outdoors,Hiking Backpack,119.99,1,119.99,North,Card,3,No,Organic Search
+ORD-045,2025-11-23,CUST-044,New,Home & Garden,Air Purifier,199.99,1,199.99,South,Cash,,Yes,Social Media
+ORD-046,2025-11-23,CUST-045,VIP,Electronics,Drone Camera,1299.99,1,1299.99,East,Card,5,No,Direct
+ORD-047,2025-11-24,CUST-046,Returning,Books,Behavioural Economics,38.99,1,38.99,West,Card,4,No,Email
+ORD-048,2025-11-24,CUST-047,New,Clothing,Silk Tie,49.99,1,49.99,North,Card,3,No,Social Media
+ORD-049,2025-11-25,CUST-048,Loyal,Electronics,Wireless Earbuds,149.99,1,149.99,South,PayPal,4,No,Organic Search
+ORD-050,2025-11-25,CUST-049,VIP,Home & Garden,Espresso Machine,599.99,1,599.99,West,Card,5,No,Direct
+ORD-051,2025-11-26,CUST-050,New,Sports & Outdoors,Weighted Blanket,89.99,1,89.99,East,Cash,3,No,Social Media
+ORD-052,2025-11-26,CUST-051,Returning,Electronics,Monitor Arm,69.99,1,69.99,North,Card,4,No,Email
+ORD-053,2025-11-27,CUST-052,Loyal,Clothing,Cotton Sweater,79.99,2,159.98,South,Card,5,No,Organic Search
+ORD-054,2025-11-27,CUST-053,VIP,Books,Risk Management Guide,52.99,1,52.99,West,Card,4,No,Direct
+ORD-055,2025-11-28,CUST-054,New,Home & Garden,Throw Pillow Set,29.99,2,59.98,East,Card,,No,Social Media
+ORD-056,2025-11-28,CUST-055,Returning,Electronics,Graphics Tablet,399.99,1,399.99,North,PayPal,5,No,Email
+ORD-057,2025-11-29,CUST-056,Loyal,Sports & Outdoors,Water Bottle,14.99,4,59.96,West,Cash,4,No,Organic Search
+ORD-058,2025-11-29,CUST-057,New,Clothing,Leather Gloves,59.99,1,59.99,South,Card,4,No,Social Media
+ORD-059,2025-11-30,CUST-058,VIP,Home & Garden,Robot Vacuum,799.99,1,799.99,East,Card,5,No,Direct
+ORD-060,2025-11-30,CUST-059,Returning,Books,Design Thinking,45.99,1,45.99,West,Card,3,No,Email
+ORD-061,2025-12-01,CUST-060,New,Electronics,Streaming Device,49.99,1,49.99,North,Card,4,No,Social Media
+ORD-062,2025-12-01,CUST-061,Loyal,Clothing,Winter Jacket,189.99,1,189.99,South,Card,5,No,Organic Search
+ORD-063,2025-12-02,CUST-062,VIP,Sports & Outdoors,Electric Scooter,1299.99,1,1299.99,East,Card,4,No,Direct
+ORD-064,2025-12-02,CUST-063,New,Home & Garden,Wall Art Set,84.99,1,84.99,West,PayPal,3,Yes,Social Media
+ORD-065,2025-12-03,CUST-064,Returning,Electronics,Smart Plug Kit,34.99,2,69.98,North,Card,4,No,Email
+ORD-066,2025-12-03,CUST-065,Loyal,Books,Storytelling with Data,41.99,1,41.99,South,Cash,5,No,Organic Search
+ORD-067,2025-12-04,CUST-066,New,Clothing,Running Shorts,34.99,1,34.99,East,Card,3,No,Social Media
+ORD-068,2025-12-04,CUST-067,VIP,Electronics,HomePod Mini,99.99,2,199.98,West,Card,4,No,Direct
+ORD-069,2025-12-05,CUST-068,Returning,Sports & Outdoors,Foam Roller,24.99,1,24.99,North,Card,4,No,Email
+ORD-070,2025-12-05,CUST-069,New,Home & Garden,Kitchen Scale,19.99,1,19.99,South,Card,3,No,Social Media
+ORD-071,2025-12-06,CUST-070,Loyal,Electronics,Cable Management Kit,15.99,3,47.97,East,PayPal,4,No,Organic Search
+ORD-072,2025-12-06,CUST-071,VIP,Clothing,Silk Blouse,129.99,1,129.99,West,Card,5,No,Direct
+ORD-073,2025-12-07,CUST-072,New,Books,Nudge: Improving Decisions,36.00,1,36.00,North,Card,4,No,Social Media
+ORD-074,2025-12-07,CUST-073,Returning,Home & Garden,Coffee Table,249.99,1,249.99,South,Cash,4,No,Email
+ORD-075,2025-12-08,CUST-074,Loyal,Electronics,WiFi Router,129.99,1,129.99,East,Card,5,No,Organic Search
+ORD-076,2025-12-08,CUST-075,New,Sports & Outdoors,Protein Powder,44.99,1,44.99,West,Card,,Yes,Social Media
+ORD-077,2025-12-09,CUST-076,VIP,Clothing,Designer Handbag,1299.99,1,1299.99,North,Card,5,No,Direct
+ORD-078,2025-12-09,CUST-077,Returning,Electronics,Solar Charger,54.99,1,54.99,East,PayPal,4,No,Email
+ORD-079,2025-12-10,CUST-078,Loyal,Books,Thinking in Systems,48.00,1,48.00,South,Card,5,No,Organic Search
+ORD-080,2025-12-10,CUST-079,New,Home & Garden,Storage Ottoman,159.99,1,159.99,West,Card,4,No,Social Media
+ORD-081,2025-12-11,CUST-080,VIP,Electronics,VR Headset,499.99,1,499.99,North,Card,5,No,Direct
+ORD-082,2025-12-11,CUST-081,Returning,Sports & Outdoors,Yoga Block Set,19.99,2,39.98,East,Cash,4,No,Email
+ORD-083,2025-12-12,CUST-082,New,Clothing,Denim Shorts,54.99,1,54.99,South,Card,3,No,Social Media
+ORD-084,2025-12-12,CUST-083,Loyal,Home & Garden,Glass Jar Set,24.99,1,24.99,West,Card,4,No,Organic Search
+ORD-085,2025-12-13,CUST-084,VIP,Electronics,Curved Monitor,849.99,1,849.99,North,Card,5,No,Direct
+ORD-086,2025-12-13,CUST-085,Returning,Books,Competitive Strategy,62.00,1,62.00,East,PayPal,4,No,Email
+ORD-087,2025-12-14,CUST-086,New,Sports & Outdoors,Jump Rope,12.99,2,25.98,West,Card,4,No,Social Media
+ORD-088,2025-12-14,CUST-087,Loyal,Electronics,Desk Lamp,44.99,1,44.99,North,Card,5,No,Organic Search
+ORD-089,2025-12-15,CUST-088,VIP,Clothing,Silk Scarf,89.99,1,89.99,South,Card,5,No,Direct
+ORD-090,2025-12-15,CUST-089,Returning,Home & Garden,Bath Mat Set,34.99,1,34.99,East,Card,3,No,Email
+ORD-091,2025-12-16,CUST-090,New,Books,The Lean Startup,29.99,1,29.99,West,Cash,,No,Social Media
+ORD-092,2025-12-16,CUST-091,Loyal,Electronics,Travel Adapter,27.99,2,55.98,North,Card,4,No,Organic Search
+ORD-093,2025-12-17,CUST-092,VIP,Sports & Outdoors,Trekking Poles,89.99,1,89.99,South,Card,5,No,Direct
+ORD-094,2025-12-17,CUST-093,Returning,Clothing,Polo Shirt,59.99,2,119.98,East,Card,4,No,Email
+ORD-095,2025-12-18,CUST-094,New,Home & Garden,Scented Candle Set,39.99,1,39.99,West,PayPal,4,No,Social Media
+ORD-096,2025-12-18,CUST-095,Loyal,Books,Data Strategy,55.99,1,55.99,North,Card,5,No,Organic Search
+ORD-097,2025-12-19,CUST-096,VIP,Electronics,Soundbar,349.99,1,349.99,South,Card,5,No,Direct
+ORD-098,2025-12-19,CUST-097,New,Clothing,Sweatpants,44.99,1,44.99,East,Card,2,Yes,Social Media
+ORD-099,2025-12-20,CUST-098,Loyal,Sports & Outdoors,Kettlebell,59.99,1,59.99,West,Card,4,No,Organic Search
+ORD-100,2025-12-20,CUST-099,VIP,Home & Garden,Pendant Light,189.99,1,189.99,North,Card,5,No,Direct
+ORD-101,2025-12-21,CUST-100,Returning,Electronics,LED Strip Lights,22.99,2,45.98,East,Cash,4,No,Email
+ORD-102,2025-12-21,CUST-101,New,Books,Superforecasting,31.99,1,31.99,South,Card,3,No,Social Media
+ORD-103,2025-12-22,CUST-102,Loyal,Clothing,Fleece Jacket,74.99,1,74.99,West,Card,5,No,Organic Search
+ORD-104,2025-12-22,CUST-103,VIP,Home & Garden,Stand Mixer,449.99,1,449.99,North,Card,5,No,Direct
+ORD-105,2025-12-23,CUST-104,New,Electronics,Fitness Tracker,99.99,1,99.99,East,PayPal,4,No,Social Media
+ORD-106,2025-12-23,CUST-105,Returning,Sports & Outdoors,Skipping Rope,9.99,3,29.97,South,Card,4,No,Email
+ORD-107,2025-12-24,CUST-106,Loyal,Books,Good to Great,35.00,1,35.00,West,Card,5,No,Organic Search
+ORD-108,2025-12-24,CUST-107,New,Home & Garden,Photo Frames Set,27.99,1,27.99,North,Card,4,No,Social Media
+ORD-109,2025-12-25,CUST-108,VIP,Electronics,Smart Doorbell,199.99,1,199.99,South,Card,5,No,Direct
+ORD-110,2025-12-25,CUST-109,Returning,Clothing,Linen Shirt,69.99,1,69.99,East,Card,4,No,Email
+ORD-111,2025-12-26,CUST-110,New,Books,Algorithms to Live By,28.99,1,28.99,West,Cash,3,No,Social Media
+ORD-112,2025-12-26,CUST-111,Loyal,Electronics,Ring Light,69.99,1,69.99,North,Card,4,No,Organic Search
+ORD-113,2025-12-27,CUST-112,VIP,Sports & Outdoors,Pilates Mat,49.99,1,49.99,South,Card,5,No,Direct
+ORD-114,2025-12-27,CUST-113,Returning,Home & Garden,Cushion Covers,19.99,2,39.98,East,Card,4,No,Email
+ORD-115,2025-12-28,CUST-114,Loyal,Clothing,Cargo Pants,69.99,1,69.99,West,Card,5,No,Organic Search
+ORD-116,2025-12-28,CUST-115,New,Electronics,Phone Case,19.99,1,19.99,North,Card,4,No,Social Media
+ORD-117,2025-12-29,CUST-116,VIP,Books,The Innovators Dilemma,42.99,1,42.99,South,PayPal,5,No,Direct
+ORD-118,2025-12-29,CUST-117,Returning,Sports & Outdoors,Sweat Towel,14.99,3,44.97,East,Card,4,No,Email
+ORD-119,2025-12-30,CUST-118,New,Home & Garden,Desk Organiser,32.99,1,32.99,West,Card,3,No,Social Media
+ORD-120,2025-12-30,CUST-119,Loyal,Electronics,USB Microphone,129.99,1,129.99,North,Card,5,No,Organic Search
+ORD-121,2025-12-31,CUST-120,VIP,Clothing,Cashmere Scarf,179.99,1,179.99,South,Card,5,No,Direct
+ORD-122,2025-12-31,CUST-121,New,Sports & Outdoors,Ankle Weights,24.99,1,24.99,West,Card,,No,Social Media
+ORD-123,2026-01-01,CUST-122,Returning,Electronics,Dual Monitor Stand,79.99,1,79.99,East,Card,4,No,Email
+ORD-124,2026-01-01,CUST-123,Loyal,Books,Exponential Organizations,44.99,1,44.99,North,Card,5,No,Organic Search
+ORD-125,2026-01-02,CUST-124,VIP,Home & Garden,Automatic Soap Dispenser,34.99,2,69.98,South,Card,4,No,Direct
+ORD-126,2026-01-02,CUST-125,New,Clothing,Bomber Jacket,149.99,1,149.99,West,PayPal,3,Yes,Social Media
+ORD-127,2026-01-03,CUST-126,Returning,Electronics,Power Bank,44.99,1,44.99,East,Cash,4,No,Email
+ORD-128,2026-01-03,CUST-127,Loyal,Sports & Outdoors,Insulated Flask,29.99,1,29.99,North,Card,5,No,Organic Search
+ORD-129,2026-01-04,CUST-128,VIP,Clothing,Leather Jacket,399.99,1,399.99,South,Card,5,No,Direct
+ORD-130,2026-01-04,CUST-129,New,Home & Garden,Wine Rack,54.99,1,54.99,West,Card,4,No,Social Media
+ORD-131,2026-01-05,CUST-130,Loyal,Books,Factfulness,32.00,1,32.00,East,Card,5,No,Organic Search
+ORD-132,2026-01-05,CUST-131,VIP,Electronics,Portable Projector,599.99,1,599.99,North,Card,5,No,Direct
+ORD-133,2026-01-06,CUST-132,Returning,Sports & Outdoors,Gym Bag,49.99,1,49.99,West,Card,4,No,Email
+ORD-134,2026-01-06,CUST-133,New,Clothing,Cardigan,89.99,1,89.99,South,Card,3,No,Social Media
+ORD-135,2026-01-07,CUST-134,Loyal,Electronics,Webcam 4K,199.99,1,199.99,East,Card,4,No,Organic Search
+ORD-136,2026-01-07,CUST-135,VIP,Home & Garden,Decorative Mirror,249.99,1,249.99,North,Card,5,No,Direct
+ORD-137,2026-01-08,CUST-136,New,Books,Rework,24.99,1,24.99,West,Cash,4,No,Social Media
+ORD-138,2026-01-08,CUST-137,Returning,Clothing,Hoodie,59.99,1,59.99,East,Card,4,No,Email
+ORD-139,2026-01-09,CUST-138,Loyal,Sports & Outdoors,Pull-Up Bar,39.99,1,39.99,North,Card,5,No,Organic Search
+ORD-140,2026-01-09,CUST-139,VIP,Home & Garden,Espresso Cups Set,44.99,1,44.99,South,Card,4,No,Direct
+ORD-141,2026-01-10,CUST-140,New,Electronics,Car Phone Mount,14.99,1,14.99,West,PayPal,3,No,Social Media
+ORD-142,2026-01-10,CUST-141,Returning,Books,Deep Work,27.00,1,27.00,East,Card,5,No,Email
+ORD-143,2026-01-11,CUST-142,Loyal,Clothing,Trench Coat,249.99,1,249.99,North,Card,5,No,Organic Search
+ORD-144,2026-01-11,CUST-143,VIP,Electronics,Smart Speaker,199.99,1,199.99,South,Card,4,No,Direct
+ORD-145,2026-01-12,CUST-144,New,Sports & Outdoors,Resistance Tube Set,14.99,2,29.98,West,Card,4,No,Social Media
+ORD-146,2026-01-12,CUST-145,Loyal,Home & Garden,Fridge Organiser,22.99,1,22.99,East,Card,5,No,Organic Search
+ORD-147,2026-01-13,CUST-146,VIP,Books,The Hard Thing About Hard Things,39.99,1,39.99,North,Card,5,No,Direct
+ORD-148,2026-01-13,CUST-147,Returning,Electronics,Camera Lens Kit,449.99,1,449.99,South,Card,4,No,Email
+ORD-149,2026-01-14,CUST-148,New,Clothing,Beanie Hat,19.99,1,19.99,West,Card,4,No,Social Media
+ORD-150,2026-01-14,CUST-149,Loyal,Sports & Outdoors,Jump Rope,9.99,1,9.99,East,Cash,4,No,Organic Search
+ORD-151,2026-01-15,CUST-150,VIP,Home & Garden,Crystal Whiskey Set,129.99,1,129.99,North,Card,5,No,Direct
