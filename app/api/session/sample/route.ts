@@ -4,6 +4,18 @@ import { createSession } from "@/lib/supabase/queries";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
+export async function GET() {
+  try {
+    const filePath = path.join(process.cwd(), "public", "sample-data.csv");
+    const csvContent = fs.readFileSync(filePath, "utf-8");
+    return new NextResponse(csvContent, {
+      headers: { "Content-Type": "text/csv" },
+    });
+  } catch {
+    return NextResponse.json({ error: "Sample data not found" }, { status: 500 });
+  }
+}
+
 export async function POST() {
   try {
     const sb = getSupabase();

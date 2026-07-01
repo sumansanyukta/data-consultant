@@ -84,7 +84,7 @@ function IntakeInner() {
 
     (async () => {
       try {
-        const res = await fetch("/sample-data.csv");
+        const res = await fetch("/api/session/sample");
         const text = await res.text();
         setCsvContent(text);
 
@@ -129,6 +129,8 @@ function IntakeInner() {
         setGoal("diagnostic");
       } catch (e) {
         console.error("Failed to load sample data", e);
+        setParsedFile(null);
+        setCsvContent(null);
       }
     })();
   }, [isSample, parsedFile, sessionId]);
