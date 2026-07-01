@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Plus, FileClock, Database } from "lucide-react";
+import { LayoutDashboard, Plus, FileClock } from "lucide-react";
+import { Logo } from "@/components/logo";
 import { useClients } from "@/lib/supabase/hooks";
 
 const NAV_ITEMS = [
@@ -25,18 +26,8 @@ export function Sidebar() {
     <aside className="w-[220px] flex-shrink-0 bg-card border-r border-border flex flex-col h-full">
       {/* Logo */}
       <div className="px-5 pt-7 pb-6 border-b border-border">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-            <Database className="w-3.5 h-3.5 text-white" />
-          </div>
-          <div>
-            <p className="text-[13px] font-semibold text-foreground leading-none">
-              Unwritten
-            </p>
-            <p className="text-[10px] text-muted-foreground font-mono mt-0.5 leading-none">
-              Data
-            </p>
-          </div>
+        <Link href="/">
+          <Logo size="sm" />
         </Link>
       </div>
 
