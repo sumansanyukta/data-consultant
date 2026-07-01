@@ -13,26 +13,16 @@ import {
   Save,
   CheckCircle2,
   Download,
+  Database,
+  BarChart3,
+  Shield,
+  Sparkles,
 } from "lucide-react";
 import { useSessionDetail } from "@/lib/supabase/hooks";
 import { addConsultantNote } from "@/lib/supabase/queries";
-
-const badgeStyles = {
-  danger: "bg-red-50 text-red-700",
-  warning: "bg-amber-50 text-amber-700",
-  info: "bg-muted text-muted-foreground",
-  accent: "bg-accent text-accent-foreground",
-  muted: "bg-muted text-muted-foreground",
-  success: "bg-emerald-50 text-emerald-700",
-};
-
-function Badge({ children, variant = "muted" }: { children: React.ReactNode; variant?: keyof typeof badgeStyles }) {
-  return (
-    <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full font-mono tracking-wide ${badgeStyles[variant]}`}>
-      {children}
-    </span>
-  );
-}
+import { NullBarChart } from "@/components/charts/null-bar-chart";
+import { ColumnTypeChart } from "@/components/charts/column-type-chart";
+import { SeverityChart } from "@/components/charts/severity-chart";
 
 function ResultsInner() {
   const router = useRouter();
@@ -42,7 +32,6 @@ function ResultsInner() {
   const [notes, setNotes] = useState("");
   const [notesSaving, setNotesSaving] = useState(false);
   const [notesSaved, setNotesSaved] = useState(false);
-  const [openFlag, setOpenFlag] = useState<number | null>(null);
 
   if (loading) {
     return (
@@ -64,12 +53,33 @@ function ResultsInner() {
     );
   }
 
-  const analysisType = input?.businessGoal ?? "Diagnostic";
+  const dataFile = input?.dataFiles?.[0];
+  const nullPct = dataFile?.nullPct ?? {};
+  const dtypes = dataFile?.dtypes ?? {};
+  const columns = dataFile?.columns ?? [];
+  const rowCount = dataFile?.rowCount ?? 0;
+  const colCount = dataFile?.columnCount ?? 0;
+
+  const nullData = Object.entries(nullPct).map(([name, pct]) => ({ name, nullPct: pct }));
+  const typeCounts: Record<string, number> = {};
+  for (const dt of Object.values(dtypes)) typeCounts[dt] = (typeCounts[dt] ?? 0) + 1;
+  const typeData = Object.entries(typeCounts).map(([type, count]) => ({ type, count }));
+
+  const severityCounts: Record<string, number> = {};
+  for (const f of output.dataQualityFlags ?? []) severityCounts[f.severity] = (severityCounts[f.severity] ?? 0) + 1;
+  const severityData = Object.entries(severityCounts).map(([severity, count]) => ({ severity, count }));
+
+  const analyses = output.recommendedAnalyses ?? [];
   const signals = output.keySignals ?? [];
   const flags = output.dataQualityFlags ?? [];
-  const analyses = output.recommendedAnalyses ?? [];
-  const followUps = output.followUpQuestions ?? [];
-  const assumptionsList = output.assumptions ?? [];
+
+  const statCards = [
+    { label: "Confidence", value: `${output.confidenceScore}%`, icon: Shield, color: output.confidenceScore >= 75 ? "text-emerald-600 bg-emerald-50" : output.confidenceScore >= 55 ? "text-amber-600 bg-amber-50" : "text-red-600 bg-red-50" },
+    { label: "Completeness", value: `${output.dataCompleteness}%`, icon: Database, color: output.dataCompleteness >= 75 ? "text-emerald-600 bg-emerald-50" : output.dataCompleteness >= 55 ? "text-amber-600 bg-amber-50" : "text-red-600 bg-red-50" },
+    { label: "Columns", value: String(colCount), icon: BarChart3, color: "text-blue-500 bg-blue-50" },
+    { label: "Rows", value: rowCount.toLocaleString(), icon: Database, color: "text-purple-500 bg-purple-50" },
+    { label: "Flags", value: String(flags.length), icon: Flag, color: flags.length > 0 ? "text-amber-600 bg-amber-50" : "text-emerald-600 bg-emerald-50" },
+  ];
 
   const downloadReport = () => {
     const lines = [
@@ -77,38 +87,32 @@ function ResultsInner() {
       "=".repeat(50),
       "",
       `Session: ${session.title}`,
-      `Analysis type: ${analysisType}`,
-      `Confidence: ${output.confidenceScore}%`,
-      `Data completeness: ${output.dataCompleteness}%`,
+      `Confidence: ${output.confidenceScore}% · Completeness: ${output.dataCompleteness}%`,
+      `Rows: ${rowCount} · Columns: ${colCount} · Flags: ${flags.length}`,
       "",
-      "EXECUTIVE SUMMARY",
+      "COLUMN HEALTH",
       "-".repeat(50),
-      output.execSummary,
+      ...nullData.map((c) => `  ${c.name}: ${c.nullPct}% null`),
       "",
-      "KEY SIGNALS",
+      "COLUMN TYPES",
+      "-".repeat(50),
+      ...typeData.map((t) => `  ${t.type}: ${t.count}`),
+      "",
+      "SIGNALS",
       "-".repeat(50),
       ...signals.map((s: string) => `  • ${s}`),
       "",
       "RECOMMENDED ANALYSES",
       "-".repeat(50),
-      ...analyses.map((a: any) => `  ${a.title} (${a.confidence}% confidence)\n    ${a.desc}`),
+      ...analyses.map((a: any) => `  ${a.title} (${a.confidence}%)\n    ${a.desc}`),
       "",
-      "DATA QUALITY FLAGS",
+      "FLAGS",
       "-".repeat(50),
-      ...(flags.length > 0 ? flags.map((f: any) => `  [${f.severity.toUpperCase()}] ${f.field}: ${f.issue}`) : ["  No flags detected."]),
-      "",
-      "FOLLOW-UP QUESTIONS",
-      "-".repeat(50),
-      ...followUps.map((q: string) => `  • ${q}`),
-      "",
-      "ASSUMPTIONS",
-      "-".repeat(50),
-      ...assumptionsList.map((a: string) => `  • ${a}`),
+      ...(flags.length > 0 ? flags.map((f: any) => `  [${f.severity}] ${f.field}: ${f.issue}`) : ["  None"]),
       "",
       "=".repeat(50),
-      `Generated by Pandata Insight Desk · ${new Date().toLocaleDateString("en-GB")}`,
+      `Generated ${new Date().toLocaleDateString("en-GB")}`,
     ].join("\n");
-
     const blob = new Blob([lines], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -120,233 +124,191 @@ function ResultsInner() {
 
   return (
     <div className="p-8">
-      <div className="flex items-start justify-between mb-7">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2 font-mono">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1 font-mono">
             <span>{session.title}</span>
           </div>
           <h1 className="text-2xl font-semibold text-foreground" style={{ fontFamily: "var(--font-lora), serif" }}>
-            Results Workspace
+            Results
           </h1>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-xs font-medium text-foreground">Confidence</span>
-            <span className="text-xs font-mono font-semibold text-primary ml-1">{output.confidenceScore}%</span>
-          </div>
-          <button
-            onClick={downloadReport}
-            className="flex items-center gap-2 bg-card border border-border text-foreground px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-muted transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            Download Report
+        <div className="flex items-center gap-2.5">
+          <button onClick={downloadReport} className="flex items-center gap-1.5 bg-card border border-border text-foreground px-3.5 py-2 rounded-xl text-xs font-medium hover:bg-muted transition-colors">
+            <Download className="w-3.5 h-3.5" />
+            Download
           </button>
-          <button
-            onClick={() => router.push(`/finalize?sessionId=${sessionId}`)}
-            className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-primary/90 transition-colors"
-          >
-            Finalize Session
-            <ArrowRight className="w-4 h-4" />
+          <button onClick={() => router.push(`/finalize?sessionId=${sessionId}`)} className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3.5 py-2 rounded-xl text-xs font-medium hover:bg-primary/90 transition-colors">
+            Finalize
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-[14px] p-4 mb-5 flex items-center gap-5">
-        <div className="flex-1">
-          <div className="flex justify-between text-[11px] font-mono text-muted-foreground mb-1.5">
-            <span>Overall confidence</span>
-            <span>{output.confidenceScore} / 100</span>
+      {/* Stat cards */}
+      <div className="grid grid-cols-5 gap-3 mb-6">
+        {statCards.map(({ label, value, icon: Icon, color }) => (
+          <div key={label} className="bg-card border border-border rounded-[14px] p-4 flex items-center gap-3">
+            <div className={`w-9 h-9 rounded-xl ${color.split(" ")[1]} flex items-center justify-center flex-shrink-0`}>
+              <Icon className={`w-4 h-4 ${color.split(" ")[0]}`} />
+            </div>
+            <div>
+              <p className="text-lg font-semibold text-foreground font-mono">{value}</p>
+              <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{label}</p>
+            </div>
           </div>
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-            <div className={`h-full rounded-full ${output.confidenceScore >= 75 ? "bg-emerald-500" : output.confidenceScore >= 55 ? "bg-amber-500" : "bg-red-400"}`} style={{ width: `${output.confidenceScore}%` }} />
-          </div>
+        ))}
+      </div>
+
+      {/* Charts row */}
+      <div className="grid grid-cols-5 gap-5 mb-6">
+        <div className="col-span-3 bg-card border border-border rounded-[14px] p-5">
+          <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Column Health — Null Rate</p>
+          <NullBarChart data={nullData} />
         </div>
-        <div className="w-px h-8 bg-border" />
-        <div className="flex-1">
-          <div className="flex justify-between text-[11px] font-mono text-muted-foreground mb-1.5">
-            <span>Data completeness</span>
-            <span>{output.dataCompleteness}%</span>
+        <div className="col-span-2 space-y-4">
+          <div className="bg-card border border-border rounded-[14px] p-5">
+            <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-2">Column Types</p>
+            <ColumnTypeChart data={typeData} />
           </div>
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-            <div className={`h-full rounded-full ${output.dataCompleteness >= 75 ? "bg-emerald-500" : output.dataCompleteness >= 55 ? "bg-amber-500" : "bg-red-400"}`} style={{ width: `${output.dataCompleteness}%` }} />
+          <div className="bg-card border border-border rounded-[14px] p-5">
+            <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Quality Flags by Severity</p>
+            <SeverityChart data={severityData} total={flags.length} />
           </div>
-        </div>
-        <div className="w-px h-8 bg-border" />
-        <div className="text-center px-2">
-          <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Analysis type</p>
-          <Badge variant="accent">{analysisType}</Badge>
-        </div>
-        <div className="text-center px-2">
-          <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-wider mb-1">Data flags</p>
-          <Badge variant={flags.length > 0 ? "warning" : "success"}>{flags.length > 0 ? `${flags.length} issues` : "None"}</Badge>
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-5">
-        <div className="col-span-3 space-y-5">
-          <div className="bg-card border border-border rounded-[14px] p-6">
-            <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Executive Summary</p>
-            <p className="text-sm leading-relaxed text-foreground mb-4">{output.execSummary}</p>
-          </div>
+      {/* Signals + Analyses row */}
+      <div className="grid grid-cols-5 gap-5 mb-6">
+        <div className="col-span-3 space-y-4">
+          {analyses.length > 0 && (
+            <div className="bg-card border border-border rounded-[14px] p-5">
+              <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Recommended Analyses</p>
+              <div className="space-y-2.5">
+                {analyses.slice(0, 4).map((a, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-muted/40">
+                    <div className="w-5 h-5 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-[10px] font-mono font-semibold text-primary">{String(i + 1).padStart(2, "0")}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-0.5">
+                        <span className="text-xs font-semibold text-foreground truncate">{a.title}</span>
+                        <span className="text-[10px] font-mono text-muted-foreground flex-shrink-0">{a.confidence}%</span>
+                      </div>
+                      <div className="h-1 bg-muted rounded-full overflow-hidden mb-1 max-w-[120px]">
+                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${a.confidence}%` }} />
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">{a.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {signals.length > 0 && (
-            <div>
-              <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Key Signals</p>
-              <div className="bg-card border border-border rounded-[14px] p-5 space-y-2">
-                {signals.map((s, i) => (
-                  <div key={i} className="flex items-start gap-2.5 text-sm text-foreground">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 mt-2" />
-                    <p className="text-xs leading-relaxed">{s}</p>
-                  </div>
+            <div className="bg-card border border-border rounded-[14px] p-5">
+              <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Key Signals</p>
+              <div className="flex flex-wrap gap-1.5">
+                {signals.slice(0, 6).map((s, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 text-[11px] bg-accent text-accent-foreground px-2.5 py-1 rounded-lg font-medium leading-snug">
+                    <Sparkles className="w-3 h-3 text-primary flex-shrink-0" />
+                    {s}
+                  </span>
                 ))}
               </div>
             </div>
           )}
-
-          {analyses.length > 0 && (
-            <div>
-              <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Suggested Analyses</p>
-              <div className="space-y-3">
-                {analyses.map((a, i) => (
-                  <div key={i} className="bg-card border border-border rounded-[14px] p-5">
-                    <div className="flex items-start gap-4">
-                      <div className="w-6 h-6 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-[11px] font-mono font-semibold text-primary">{String(i + 1).padStart(2, "0")}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-3 mb-1.5">
-                          <h4 className="text-sm font-semibold text-foreground">{a.title}</h4>
-                          <div className="flex items-center gap-1.5 flex-shrink-0">
-                            <div className="w-14 h-1.5 bg-muted rounded-full overflow-hidden">
-                              <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${a.confidence}%` }} />
-                            </div>
-                            <span className="text-[10px] font-mono text-muted-foreground">{a.confidence}%</span>
-                          </div>
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed mb-2">{a.desc}</p>
-                        <div className="flex gap-1.5">
-                          {a.tags.map((t) => (<Badge key={t} variant="muted">{t}</Badge>))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="bg-card border border-border rounded-[14px] p-6">
-            <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Consultant Notes</p>
-
-            {data?.notes && data.notes.length > 0 && (
-              <div className="space-y-2 mb-4 pb-4 border-b border-border">
-                {data.notes.map((note) => (
-                  <div key={note.id} className="text-xs text-foreground leading-relaxed bg-muted/50 rounded-xl px-3.5 py-2.5">
-                    {note.noteText}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <textarea
-              value={notes}
-              onChange={(e) => { setNotes(e.target.value); setNotesSaved(false); }}
-              rows={3}
-              placeholder="Add your own context, caveats, or observations here..."
-              className="w-full bg-input-background border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none leading-relaxed"
-            />
-
-            <div className="flex items-center justify-between mt-3">
-              <p className="text-[11px] text-muted-foreground font-mono">
-                {notes.length > 0 ? `${notes.length} chars` : ""}
-              </p>
-              <button
-                onClick={async () => {
-                  if (!notes.trim()) return;
-                  setNotesSaving(true);
-                  try {
-                    await addConsultantNote(sessionId, notes.trim());
-                    setNotes("");
-                    setNotesSaved(true);
-                    refetch();
-                  } catch (e) {
-                    console.error("Failed to save note", e);
-                  } finally {
-                    setNotesSaving(false);
-                  }
-                }}
-                disabled={!notes.trim() || notesSaving}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  notesSaved
-                    ? "bg-emerald-50 text-emerald-700"
-                    : notes.trim() && !notesSaving
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
-                      : "bg-muted text-muted-foreground cursor-not-allowed"
-                }`}
-              >
-                {notesSaving ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                ) : notesSaved ? (
-                  <CheckCircle2 className="w-3 h-3" />
-                ) : (
-                  <Save className="w-3 h-3" />
-                )}
-                {notesSaved ? "Saved" : notesSaving ? "Saving..." : "Save Note"}
-              </button>
-            </div>
-          </div>
         </div>
 
-        <div className="col-span-2 space-y-5">
-          <div className="bg-card border border-border rounded-[14px] p-5">
-            <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Data Quality Flags</p>
-            <div className="space-y-2">
-              {flags.length === 0 && <p className="text-xs text-muted-foreground">No flags detected.</p>}
-              {flags.map((f, i) => (
-                <div key={i}>
-                  <button onClick={() => setOpenFlag(openFlag === i ? null : i)} className="w-full flex items-start gap-2.5 text-left">
-                    {f.severity === "danger" ? <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" /> : f.severity === "warning" ? <Flag className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" /> : <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <code className="text-[11px] font-mono bg-muted px-1.5 py-0.5 rounded text-foreground">{f.field}</code>
-                        <Badge variant={f.severity === "danger" ? "danger" : f.severity === "warning" ? "warning" : "muted"}>{f.severity}</Badge>
-                      </div>
-                      {openFlag === i && <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{f.issue}</p>}
+        <div className="col-span-2 space-y-4">
+          {flags.length > 0 && (
+            <div className="bg-card border border-border rounded-[14px] p-5">
+              <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Data Quality Flags</p>
+              <div className="space-y-2">
+                {flags.map((f, i) => (
+                  <div key={i} className="flex items-start gap-2.5 text-[11px]">
+                    {f.severity === "danger" ? <AlertCircle className="w-3.5 h-3.5 text-red-500 flex-shrink-0 mt-0.5" /> : f.severity === "warning" ? <Flag className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5" /> : <Info className="w-3.5 h-3.5 text-blue-400 flex-shrink-0 mt-0.5" />}
+                    <div>
+                      <code className="text-[10px] font-mono bg-muted px-1 py-0.5 rounded text-foreground">{f.field}</code>
+                      <p className="text-muted-foreground mt-0.5">{f.issue}</p>
                     </div>
-                  </button>
-                </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {output.followUpQuestions && output.followUpQuestions.length > 0 && (
+            <div className="bg-card border border-border rounded-[14px] p-5">
+              <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-2.5">Follow-up Questions</p>
+              <div className="space-y-2">
+                {output.followUpQuestions.slice(0, 3).map((q, i) => (
+                  <div key={i} className="flex items-start gap-2 text-[11px]">
+                    <MessageSquare className="w-3 h-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground">{q}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {output.assumptions && output.assumptions.length > 0 && (
+            <div className="bg-card border border-border rounded-[14px] p-5">
+              <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-2.5">Assumptions</p>
+              <div className="space-y-1.5">
+                {output.assumptions.slice(0, 3).map((a, i) => (
+                  <div key={i} className="flex items-start gap-2 text-[11px]">
+                    <Lightbulb className="w-3 h-3 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground">{a}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Consultant Notes */}
+      <div className="max-w-2xl">
+        <div className="bg-card border border-border rounded-[14px] p-5">
+          <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Consultant Notes</p>
+          {data?.notes && data.notes.length > 0 && (
+            <div className="space-y-1.5 mb-3 pb-3 border-b border-border">
+              {data.notes.map((note) => (
+                <div key={note.id} className="text-xs text-foreground leading-relaxed bg-muted/50 rounded-lg px-3 py-2">{note.noteText}</div>
               ))}
             </div>
+          )}
+          <textarea
+            value={notes}
+            onChange={(e) => { setNotes(e.target.value); setNotesSaved(false); }}
+            rows={2}
+            placeholder="Add a note…"
+            className="w-full bg-input-background border border-border rounded-xl px-3.5 py-2.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none leading-relaxed"
+          />
+          <div className="flex items-center justify-between mt-2.5">
+            <span className="text-[10px] text-muted-foreground font-mono">{notes.length > 0 ? `${notes.length} chars` : ""}</span>
+            <button
+              onClick={async () => {
+                if (!notes.trim()) return;
+                setNotesSaving(true);
+                try {
+                  await addConsultantNote(sessionId, notes.trim());
+                  setNotes(""); setNotesSaved(true); refetch();
+                } catch (e) { console.error(e);
+                } finally { setNotesSaving(false); }
+              }}
+              disabled={!notes.trim() || notesSaving}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${
+                notesSaved ? "bg-emerald-50 text-emerald-700" : notes.trim() && !notesSaving ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer" : "bg-muted text-muted-foreground cursor-not-allowed"
+              }`}
+            >
+              {notesSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : notesSaved ? <CheckCircle2 className="w-3 h-3" /> : <Save className="w-3 h-3" />}
+              {notesSaved ? "Saved" : notesSaving ? "Saving..." : "Save"}
+            </button>
           </div>
-
-          {followUps.length > 0 && (
-            <div className="bg-card border border-border rounded-[14px] p-5">
-              <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Follow-up Questions</p>
-              <div className="space-y-2.5">
-                {followUps.map((q, i) => (
-                  <div key={i} className="flex items-start gap-2.5">
-                    <MessageSquare className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-foreground leading-relaxed">{q}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {assumptionsList.length > 0 && (
-            <div className="bg-card border border-border rounded-[14px] p-5">
-              <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Assumptions Made</p>
-              <div className="space-y-2.5">
-                {assumptionsList.map((a, i) => (
-                  <div key={i} className="flex items-start gap-2.5">
-                    <Lightbulb className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-foreground leading-relaxed">{a}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -355,11 +317,7 @@ function ResultsInner() {
 
 export default function ResultsPage() {
   return (
-    <Suspense fallback={
-      <div className="flex-1 flex items-center justify-center p-8">
-        <Loader2 className="w-6 h-6 text-primary animate-spin" />
-      </div>
-    }>
+    <Suspense fallback={<div className="flex-1 flex items-center justify-center p-8"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>}>
       <ResultsInner />
     </Suspense>
   );
