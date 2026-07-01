@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { FlowProgress } from "@/components/flow-progress";
 
-const WORKFLOW_ROUTES = ["/new-session", "/intake", "/analysis-running", "/results", "/finalize"];
+const WORKFLOW_ROUTES = ["/new-session", "/intake", "/analysis-running", "/results", "/next-steps"];
 
 const breadcrumbLabels: Record<string, string> = {
   "/": "Overview · All clients",
@@ -21,7 +21,7 @@ export function TopBar() {
     | "intake"
     | "analysis-running"
     | "results"
-    | "finalize";
+    | "next-steps";
 
   return (
     <header className="flex-shrink-0 bg-background border-b border-border px-7 py-3 flex items-center justify-between">

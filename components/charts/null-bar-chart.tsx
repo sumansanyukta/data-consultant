@@ -35,7 +35,7 @@ export function NullBarChart({ data }: Props) {
           <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fontFamily: "var(--font-jetbrains)" }} tickLine={false} axisLine={false} width={70} />
           <Tooltip
             contentStyle={{ fontSize: 11, fontFamily: "var(--font-jetbrains)", borderRadius: 8, border: "1px solid #E0DDD7" }}
-            formatter={(value) => [`${value}% null`, "Null rate"]}
+            formatter={(value: any) => [`${value}% null`, "Null rate"]}
           />
           <Bar dataKey="nullPct" radius={[0, 4, 4, 0]} barSize={14}>
             {sorted.map((_, i) => (

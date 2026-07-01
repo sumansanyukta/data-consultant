@@ -23,6 +23,9 @@ import { addConsultantNote } from "@/lib/supabase/queries";
 import { NullBarChart } from "@/components/charts/null-bar-chart";
 import { ColumnTypeChart } from "@/components/charts/column-type-chart";
 import { SeverityChart } from "@/components/charts/severity-chart";
+import { CorrelationHeatmap } from "@/components/charts/correlation-heatmap";
+import { DistributionChart } from "@/components/charts/distribution-chart";
+import { TopValuesChart } from "@/components/charts/top-values-chart";
 
 function ResultsInner() {
   const router = useRouter();
@@ -139,8 +142,8 @@ function ResultsInner() {
             <Download className="w-3.5 h-3.5" />
             Download
           </button>
-          <button onClick={() => router.push(`/finalize?sessionId=${sessionId}`)} className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3.5 py-2 rounded-xl text-xs font-medium hover:bg-primary/90 transition-colors">
-            Finalize
+          <button onClick={() => router.push(`/next-steps?sessionId=${sessionId}`)} className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3.5 py-2 rounded-xl text-xs font-medium hover:bg-primary/90 transition-colors">
+            Next Steps
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -178,6 +181,77 @@ function ResultsInner() {
           </div>
         </div>
       </div>
+
+      {/* Stats visual sections */}
+      {(() => {
+        const stats = output.statSummary;
+        if (!stats) return null;
+        return (
+          <div className="space-y-5 mb-6">
+            {/* Correlations */}
+            {stats.correlations?.length > 0 && (
+              <div className="bg-card border border-border rounded-[14px] p-5">
+                <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Statistical Correlations</p>
+                <CorrelationHeatmap data={stats.correlations} allColumns={columns} />
+              </div>
+            )}
+
+            {/* Distributions */}
+            {stats.distributions?.length > 0 && (
+              <div className="bg-card border border-border rounded-[14px] p-5">
+                <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Value Distributions</p>
+                <DistributionChart data={stats.distributions} />
+              </div>
+            )}
+
+            {/* Top values */}
+            {stats.topValues?.length > 0 && (
+              <div className="bg-card border border-border rounded-[14px] p-5">
+                <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Most Frequent Values</p>
+                <TopValuesChart data={stats.topValues} />
+              </div>
+            )}
+
+            {/* Outliers */}
+            {stats.outliers?.length > 0 && (
+              <div className="bg-card border border-border rounded-[14px] p-5">
+                <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Anomaly Detection — Outliers (IQR method)</p>
+                <div className="space-y-1.5">
+                  {stats.outliers.slice(0, 10).map((o: any, i: number) => (
+                    <div key={i} className="flex items-center gap-2 text-[11px] font-mono">
+                      <span className="text-muted-foreground w-24 truncate">{o.col}</span>
+                      <span className="text-amber-600 font-semibold">{o.value}</span>
+                      <span className="text-muted-foreground">row {o.row + 2}</span>
+                    </div>
+                  ))}
+                  {stats.outliers.length > 10 && (
+                    <p className="text-[10px] text-muted-foreground font-mono">+{stats.outliers.length - 10} more</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Correlation highlights */}
+            {stats.correlations?.length > 0 && (
+              <div className="bg-card border border-border rounded-[14px] p-5">
+                <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-3">Key Relationships</p>
+                <div className="space-y-1.5">
+                  {stats.correlations.slice(0, 5).map((pair: any, i: number) => (
+                    <div key={i} className="flex items-center gap-2 text-[11px] font-mono">
+                      <div className={`w-2 h-2 rounded-full ${pair.r > 0 ? "bg-emerald-500" : "bg-rose-500"}`} />
+                      <span className="text-foreground">{pair.colA}</span>
+                      <span className="text-muted-foreground">×</span>
+                      <span className="text-foreground">{pair.colB}</span>
+                      <span className="text-muted-foreground">r =</span>
+                      <span className={pair.r > 0.5 ? "text-emerald-600 font-semibold" : pair.r < -0.5 ? "text-rose-600 font-semibold" : "text-muted-foreground"}>{pair.r}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Signals + Analyses row */}
       <div className="grid grid-cols-5 gap-5 mb-6">

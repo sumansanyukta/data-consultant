@@ -1,7 +1,9 @@
 import { profileCSV } from "./profile";
 import { checkQuality } from "./quality";
 import { analyze } from "./analyze";
+import { computeStats } from "./stats";
 import type { FileProfile, PipelineOutput } from "./types";
+import type { ComputedStats } from "./stats";
 
 export interface RunPipelineInput {
   csvContent: string;
@@ -14,19 +16,19 @@ export interface RunPipelineInput {
 export interface RunPipelineResult {
   profile: FileProfile;
   output: PipelineOutput;
+  stats: ComputedStats;
 }
 
 export function runPipeline(input: RunPipelineInput): RunPipelineResult {
   const { csvContent, fileName, storagePath, briefText, businessGoal } = input;
 
-  // Step 2: Profile
   const profile = profileCSV(csvContent, fileName, storagePath);
 
-  // Step 3: Quality
   const qualityFlags = checkQuality(profile, briefText);
 
-  // Step 4: Analyze
+  const stats = computeStats(csvContent, profile);
+
   const output = analyze(profile, qualityFlags, briefText, businessGoal);
 
-  return { profile, output };
+  return { profile, output, stats };
 }

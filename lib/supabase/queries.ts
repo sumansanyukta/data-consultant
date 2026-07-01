@@ -46,6 +46,8 @@ interface SessionOutputRow {
   assumptions: any[];
   confidence_score: number;
   data_completeness: number;
+  stat_summary?: any;
+  tasks?: any;
   created_at: string;
 }
 
@@ -109,6 +111,8 @@ function toSessionOutput(row: SessionOutputRow): SessionOutput {
     assumptions: row.assumptions ?? [],
     confidenceScore: row.confidence_score ?? 0,
     dataCompleteness: row.data_completeness ?? 0,
+    statSummary: row.stat_summary ?? null,
+    tasks: row.tasks ?? null,
     createdAt: row.created_at,
   };
 }
@@ -325,6 +329,8 @@ export async function saveSessionOutput(
     assumptions: string[];
     confidenceScore: number;
     dataCompleteness: number;
+    statSummary?: any;
+    tasks?: any;
   }
 ): Promise<SessionOutput> {
   const { data, error } = await getSupabase()
@@ -339,6 +345,8 @@ export async function saveSessionOutput(
       assumptions: output.assumptions,
       confidence_score: output.confidenceScore,
       data_completeness: output.dataCompleteness,
+      stat_summary: output.statSummary ?? null,
+      tasks: output.tasks ?? null,
     })
     .select()
     .single();
