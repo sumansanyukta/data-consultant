@@ -31,10 +31,10 @@ export function Sidebar() {
           </div>
           <div>
             <p className="text-[13px] font-semibold text-foreground leading-none">
-              Pandata
+              Unwritten
             </p>
             <p className="text-[10px] text-muted-foreground font-mono mt-0.5 leading-none">
-              Insight Desk
+              Data
             </p>
           </div>
         </Link>

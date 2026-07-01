@@ -18,8 +18,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pandata Insight Desk",
-  description: "Internal consultant workspace for analytical intake",
+  title: "Unwritten Data",
+  description: "AI-powered data analysis consultancy — explore, visualise, and act on your data",
 };
 
 export default function RootLayout({

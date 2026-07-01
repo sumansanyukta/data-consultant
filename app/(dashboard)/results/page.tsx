@@ -86,7 +86,7 @@ function ResultsInner() {
 
   const downloadReport = () => {
     const lines = [
-      "PANDATA INSIGHT DESK — Analysis Report",
+      "UNWRITTEN DATA — Analysis Report",
       "=".repeat(50),
       "",
       `Session: ${session.title}`,
@@ -252,6 +252,37 @@ function ResultsInner() {
           </div>
         );
       })()}
+
+      {/* Suggested KPIs */}
+      {output.suggestedKpis && output.suggestedKpis.length > 0 && (
+        <div className="mb-6">
+          <div className="bg-card border border-border rounded-[14px] p-5">
+            <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase font-mono mb-4">Suggested KPIs</p>
+            <div className="grid grid-cols-2 gap-3">
+              {output.suggestedKpis.map((kpi: any, i: number) => (
+                <div key={i} className={`rounded-xl p-4 border ${
+                  kpi.priority === "high"
+                    ? "bg-emerald-50/50 border-emerald-200"
+                    : kpi.priority === "medium"
+                    ? "bg-amber-50/50 border-amber-200"
+                    : "bg-muted/30 border-border"
+                }`}>
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <span className="text-xs font-semibold text-foreground">{kpi.name}</span>
+                    <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${
+                      kpi.priority === "high" ? "text-emerald-700" : kpi.priority === "medium" ? "text-amber-700" : "text-muted-foreground"
+                    }`}>
+                      {kpi.priority}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed mb-2">{kpi.description}</p>
+                  <code className="block text-[10px] font-mono bg-card border border-border rounded-lg px-2.5 py-1.5 text-foreground/80">{kpi.formula}</code>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Signals + Analyses row */}
       <div className="grid grid-cols-5 gap-5 mb-6">

@@ -48,6 +48,7 @@ interface SessionOutputRow {
   data_completeness: number;
   stat_summary?: any;
   tasks?: any;
+  suggested_kpis?: any;
   created_at: string;
 }
 
@@ -113,6 +114,7 @@ function toSessionOutput(row: SessionOutputRow): SessionOutput {
     dataCompleteness: row.data_completeness ?? 0,
     statSummary: row.stat_summary ?? null,
     tasks: row.tasks ?? null,
+    suggestedKpis: row.suggested_kpis ?? null,
     createdAt: row.created_at,
   };
 }
@@ -331,6 +333,7 @@ export async function saveSessionOutput(
     dataCompleteness: number;
     statSummary?: any;
     tasks?: any;
+    suggestedKpis?: any;
   }
 ): Promise<SessionOutput> {
   const { data, error } = await getSupabase()
@@ -347,6 +350,7 @@ export async function saveSessionOutput(
       data_completeness: output.dataCompleteness,
       stat_summary: output.statSummary ?? null,
       tasks: output.tasks ?? null,
+      suggested_kpis: output.suggestedKpis ?? null,
     })
     .select()
     .single();

@@ -3,7 +3,8 @@ import { runPipeline } from "@/lib/pipeline";
 import { saveSessionInput, saveSessionOutput, finalizeSession } from "@/lib/supabase/queries";
 import { getSupabase } from "@/lib/supabase/client";
 import { generateTasksLLM } from "@/lib/pipeline/generate-tasks-llm";
-import type { TaskItem } from "@/types";
+import { suggestKPIs } from "@/lib/pipeline/suggest-kpis";
+import type { TaskItem, KpiSuggestion } from "@/types";
 
 function generateTasksFallback(output: any, stats: any): TaskItem[] {
   const tasks: TaskItem[] = [];
@@ -85,6 +86,14 @@ export async function POST(req: NextRequest) {
       tasks = generateTasksFallback(output, stats);
     }
 
+    // Suggest KPIs via LLM
+    let suggestedKpis: KpiSuggestion[] = [];
+    try {
+      suggestedKpis = await suggestKPIs(output, stats, profile, briefText, businessGoal);
+    } catch (e) {
+      console.error("KPI suggestion failed (non-fatal):", e);
+    }
+
     // Save session output
     await saveSessionOutput(sessionId, {
       execSummary: output.execSummary,
@@ -97,6 +106,7 @@ export async function POST(req: NextRequest) {
       dataCompleteness: output.dataCompleteness,
       statSummary: stats,
       tasks,
+      suggestedKpis,
     });
 
     // Mark session as complete
