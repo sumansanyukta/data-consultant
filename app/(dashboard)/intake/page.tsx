@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useCallback } from "react";
+import { Suspense, useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronRight,
@@ -76,6 +76,33 @@ function IntakeInner() {
   const [running, setRunning] = useState(false);
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId") ?? crypto.randomUUID();
+  const isSample = searchParams.get("sample") === "true";
+  const sampleLoaded = useRef(false);
+
+  // Auto-load sample data when sample=true
+  useEffect(() => {
+    if (!isSample || sampleLoaded.current) return;
+
+    (async () => {
+      try {
+        const res = await fetch("/api/session/sample");
+        const text = await res.text();
+        const file = new File([text], "sample-data.csv", { type: "text/csv" });
+        sampleLoaded.current = true;
+        await handleFile(file);
+        setBrief(
+          "Our e-commerce client has provided a transaction dataset covering Q4 2025 through mid-January 2026. " +
+          "We need to assess overall sales performance, identify top-performing product categories and regions, " +
+          "understand customer segment behaviour, and detect any quality issues in the data. " +
+          "The goal is to produce a diagnostic review with actionable recommendations for improving revenue and customer retention."
+        );
+        setGoal("diagnostic");
+      } catch (e) {
+        console.error("Failed to load sample data", e);
+        sampleLoaded.current = false;
+      }
+    })();
+  }, [isSample]);
 
   const validations = [
     {
