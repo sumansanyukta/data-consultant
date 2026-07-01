@@ -363,6 +363,18 @@ function ResultsInner() {
         </div>
       )}
 
+      {/* ── Bottom CTA ── */}
+      <div className="bg-gradient-to-br from-primary/5 to-primary/[0.02] border border-primary/10 rounded-2xl shadow-sm p-6 mb-6 text-center">
+        <p className="text-sm font-semibold text-foreground mb-1">Ready to take action?</p>
+        <p className="text-xs text-muted-foreground mb-4">Review AI-generated tasks for the client and internal team.</p>
+        <button
+          onClick={() => router.push(`/next-steps?sessionId=${sessionId}`)}
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-primary/90 transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
+        >
+          View tasks <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+
       {/* ── Notes ── */}
       <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
         <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-3">Notes</p>
