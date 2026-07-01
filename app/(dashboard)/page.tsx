@@ -52,7 +52,7 @@ export default function DashboardPage() {
             Browse History
           </button>
         </div>
-        <div className="mt-4">
+        <div className="flex items-center justify-center gap-3 mt-6">
           <button
             onClick={async () => {
               setSampleLoading(true);
@@ -67,14 +67,14 @@ export default function DashboardPage() {
               }
             }}
             disabled={sampleLoading}
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors font-mono"
+            className="inline-flex items-center gap-2 bg-card border border-border text-foreground px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-muted transition-colors shadow-sm"
           >
             {sampleLoading ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <Eye className="w-3 h-3" />
+              <Eye className="w-4 h-4" />
             )}
-            {sampleLoading ? "Setting up sample..." : "Try with sample data"}
+            {sampleLoading ? "Setting up..." : "Try with sample data"}
           </button>
         </div>
       </div>
