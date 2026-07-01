@@ -196,92 +196,72 @@ function ResultsInner() {
         </div>
       )}
 
-      {/* ── Two-column: Data Profile + Statistics ── */}
-      <div className="grid grid-cols-2 gap-6 mb-8">
-        {/* Left: Data Profile */}
-        <div>
-          <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-3">Data Profile</p>
-          <div className="space-y-4">
-            <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
-              <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Column Health — Null Rate</p>
-              <NullBarChart data={nullData} />
-            </div>
-            <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
-              <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Column Types</p>
-              <ColumnTypeChart data={typeData} />
-            </div>
-            <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
-              <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Quality Flags</p>
-              <SeverityChart data={severityData} total={flags.length} />
-            </div>
+      {/* ── Data Profile ── */}
+      <div className="mb-8">
+        <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-3">Data Profile</p>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
+            <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Column Health</p>
+            <NullBarChart data={nullData} />
+          </div>
+          <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
+            <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Column Types</p>
+            <ColumnTypeChart data={typeData} />
+          </div>
+          <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
+            <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Quality Flags</p>
+            <SeverityChart data={severityData} total={flags.length} />
           </div>
         </div>
+      </div>
 
-        {/* Right: Statistics */}
-        {stats && (
-          <div>
-            <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-3">Statistics</p>
-            <div className="space-y-4">
-              {stats.correlations?.length > 0 && (
-                <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
-                  <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Correlations</p>
-                  <CorrelationHeatmap data={stats.correlations} allColumns={columns} />
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 gap-4">
-                {stats.distributions?.length > 0 && (
-                  <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
-                    <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Distributions</p>
-                    <DistributionChart data={stats.distributions} />
-                  </div>
-                )}
-                {stats.topValues?.length > 0 && (
-                  <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
-                    <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Top Values</p>
-                    <TopValuesChart data={stats.topValues} />
-                  </div>
-                )}
+      {/* ── Statistics ── */}
+      {stats && (
+        <div className="mb-8">
+          <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-3">Statistics</p>
+          <div className="space-y-4">
+            {stats.correlations?.length > 0 && (
+              <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
+                <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Correlations</p>
+                <CorrelationHeatmap data={stats.correlations} allColumns={columns} />
               </div>
+            )}
 
-              {stats.outliers?.length > 0 && (
+            <div className="grid grid-cols-2 gap-4">
+              {stats.distributions?.length > 0 && (
                 <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
-                  <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Outliers</p>
-                  <div className="space-y-1.5">
-                    {stats.outliers.slice(0, 6).map((o: any, i: number) => (
-                      <div key={i} className="flex items-center gap-2 text-sm font-mono">
-                        <span className="text-muted-foreground w-24 truncate">{o.col}</span>
-                        <span className="text-amber-600 font-semibold">{o.value}</span>
-                        <span className="text-muted-foreground">row {o.row + 2}</span>
-                      </div>
-                    ))}
-                    {stats.outliers.length > 6 && (
-                      <p className="text-[11px] text-muted-foreground font-mono">+{stats.outliers.length - 6} more</p>
-                    )}
-                  </div>
+                  <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Distributions</p>
+                  <DistributionChart data={stats.distributions} />
                 </div>
               )}
-
-              {stats.correlations?.length > 0 && (
+              {stats.topValues?.length > 0 && (
                 <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
-                  <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Relationships</p>
-                  <div className="space-y-2">
-                    {stats.correlations.slice(0, 5).map((pair: any, i: number) => (
-                      <div key={i} className="flex items-center gap-2 text-sm font-mono">
-                        <div className={`w-2 h-2 rounded-full ${pair.r > 0 ? "bg-emerald-500" : "bg-rose-500"}`} />
-                        <span className="text-foreground">{pair.colA}</span>
-                        <span className="text-muted-foreground">×</span>
-                        <span className="text-foreground">{pair.colB}</span>
-                        <span className={`ml-auto font-semibold ${Math.abs(pair.r) > 0.5 ? pair.r > 0 ? "text-emerald-600" : "text-rose-600" : "text-muted-foreground"}`}>{pair.r}</span>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Top Values</p>
+                  <TopValuesChart data={stats.topValues} />
                 </div>
               )}
             </div>
+
+            {stats.outliers?.length > 0 && (
+              <div className="bg-card border border-border rounded-2xl shadow-sm p-5">
+                <p className="text-[11px] font-mono font-semibold text-muted-foreground uppercase tracking-wider mb-3">Outliers</p>
+                <div className="space-y-1.5">
+                  {stats.outliers.slice(0, 6).map((o: any, i: number) => (
+                    <div key={i} className="flex items-center gap-2 text-sm font-mono">
+                      <span className="text-muted-foreground w-24 truncate">{o.col}</span>
+                      <span className="text-amber-600 font-semibold">{o.value}</span>
+                      <span className="text-muted-foreground">row {o.row + 2}</span>
+                    </div>
+                  ))}
+                  {stats.outliers.length > 6 && (
+                    <p className="text-[11px] text-muted-foreground font-mono">+{stats.outliers.length - 6} more</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* ── Recommendations ── */}
       {(analyses.length > 0 || flags.length > 0 || output.followUpQuestions?.length > 0 || output.assumptions?.length > 0 || (output.suggestedKpis && output.suggestedKpis.length > 0)) && (
