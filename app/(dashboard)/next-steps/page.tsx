@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  CheckCircle2, Circle, Loader2, ArrowRight, Save,
+  CheckCircle2, Circle, Loader2, ArrowRight, Save, AlertCircle,
   User, Users, Trash2, RefreshCw,
 } from "lucide-react";
 import { useSessionDetail } from "@/lib/supabase/hooks";
@@ -19,6 +19,7 @@ function NextStepsInner() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+  const [regenerateError, setRegenerateError] = useState<string | null>(null);
 
   useEffect(() => {
     if (data?.output?.tasks && data.output.tasks.length > 0) {
@@ -63,6 +64,7 @@ function NextStepsInner() {
 
   const handleRegenerate = async () => {
     setRegenerating(true);
+    setRegenerateError(null);
     try {
       const res = await fetch("/api/pipeline/regenerate-tasks", {
         method: "POST",
@@ -72,8 +74,9 @@ function NextStepsInner() {
       if (!res.ok) throw new Error(await res.text());
       const { tasks: newTasks } = await res.json();
       if (newTasks?.length > 0) setTasks(newTasks);
-    } catch (e) {
-      console.error("Failed to regenerate tasks", e);
+      else setRegenerateError("No tasks were generated. Try again.");
+    } catch (e: any) {
+      setRegenerateError(e.message ?? "Failed to regenerate tasks");
     } finally {
       setRegenerating(false);
     }
@@ -127,6 +130,27 @@ function NextStepsInner() {
           AI-generated action items for the client and internal team. Toggle completion, delete what doesn&apos;t apply, and save.
         </p>
       </div>
+
+      {/* Regenerate overlay */}
+      {regenerating && (
+        <div className="mb-6 bg-accent border border-primary/20 rounded-[14px] px-5 py-4 flex items-center gap-3">
+          <Loader2 className="w-4 h-4 text-primary animate-spin flex-shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-foreground">Regenerating tasks…</p>
+            <p className="text-xs text-muted-foreground">Analysing session data to create new action items</p>
+          </div>
+        </div>
+      )}
+
+      {regenerateError && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-[14px] px-5 py-3 flex items-center gap-3">
+          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-xs text-red-700">{regenerateError}</p>
+          </div>
+          <button onClick={() => setRegenerateError(null)} className="text-[11px] text-red-500 hover:underline">Dismiss</button>
+        </div>
+      )}
 
       {/* Summary bar */}
       <div className="flex items-center gap-4 mb-6 text-xs font-mono">

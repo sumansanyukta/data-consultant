@@ -45,6 +45,21 @@ function computeNullPct(rows: Record<string, unknown>[], col: string): number {
   return Math.round((nulls / rows.length) * 100);
 }
 
+function extractObjective(brief: string): string | null {
+  const patterns = [
+    /(?:why|what|how)\s+([^.?]+)/i,
+    /(?:want to|need to|looking to)\s+([^.?]+)/i,
+    /(?:goal|objective|aim)\s+(?:is\s+)?(?:to\s+)?([^.?]+)/i,
+    /understand\s+([^.?]+)/i,
+    /(?:predict|forecast|find|identify|segment)\s+([^.?]+)/i,
+  ];
+  for (const p of patterns) {
+    const m = brief.match(p);
+    if (m) return m[1].trim();
+  }
+  return null;
+}
+
 function IntakeInner() {
   const router = useRouter();
   const [brief, setBrief] = useState("");
@@ -74,6 +89,7 @@ function IntakeInner() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [csvContent, setCsvContent] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
+  const [showAllRows, setShowAllRows] = useState(false);
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId") ?? crypto.randomUUID();
   const isSample = searchParams.get("sample") === "true";
@@ -104,6 +120,8 @@ function IntakeInner() {
     })();
   }, [isSample]);
 
+  const extractedObjective = extractObjective(brief);
+
   const validations = [
     {
       label: "Brief length",
@@ -113,7 +131,7 @@ function IntakeInner() {
     {
       label: "Business question",
       ok: /why|what|how|want to|goal/i.test(brief),
-      msg: /why|what|how|want to|goal/i.test(brief) ? "Objective identified" : "No question or goal detected",
+      msg: extractedObjective ? `"${extractedObjective}"` : "No question or goal detected",
     },
     {
       label: "Data sample",
@@ -343,32 +361,42 @@ function IntakeInner() {
                   </button>
                 </div>
 
-                <div className="bg-muted/50 rounded-lg p-3 overflow-x-auto">
-                  <table className="text-[11px] font-mono w-full">
-                    <thead>
-                      <tr className="text-muted-foreground">
-                        {parsedFile.columns.map((h) => (
-                          <th key={h} className="text-left pr-4 pb-1.5 font-medium">
-                            {h}
-                            <span className="block text-[10px] text-muted-foreground/60 font-normal">
-                              {parsedFile.rawDtypes[h]}
-                            </span>
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="text-foreground">
-                      {parsedFile.sample.map((row, i) => (
-                        <tr key={i}>
-                          {parsedFile.columns.map((col) => (
-                            <td key={col} className="pr-4 py-0.5 text-foreground/80 truncate max-w-[120px]">
-                              {String(row[col] ?? "")}
-                            </td>
+                <div className="relative">
+                  <div className="bg-muted/50 rounded-lg p-3 overflow-x-auto">
+                    <table className="text-[11px] font-mono w-full">
+                      <thead>
+                        <tr className="text-muted-foreground">
+                          {parsedFile.columns.map((h) => (
+                            <th key={h} className="text-left pr-4 pb-1.5 font-medium whitespace-nowrap">
+                              {h}
+                              <span className="block text-[10px] text-muted-foreground/60 font-normal">
+                                {parsedFile.rawDtypes[h]}
+                              </span>
+                            </th>
                           ))}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="text-foreground">
+                        {(showAllRows ? parsedFile.sample : parsedFile.sample.slice(0, 5)).map((row, i) => (
+                          <tr key={i}>
+                            {parsedFile.columns.map((col) => (
+                              <td key={col} className="pr-4 py-0.5 text-foreground/80 truncate max-w-[120px]">
+                                {String(row[col] ?? "")}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {parsedFile.sample.length > 5 && (
+                    <button
+                      onClick={() => setShowAllRows(!showAllRows)}
+                      className="mt-2 text-[11px] font-mono text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showAllRows ? "Show less ↑" : `Show all ${parsedFile.sample.length} rows →`}
+                    </button>
+                  )}
                 </div>
               </div>
             ) : (

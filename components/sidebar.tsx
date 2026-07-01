@@ -23,7 +23,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-[220px] flex-shrink-0 bg-card border-r border-border flex flex-col h-full">
+    <aside className="w-[220px] flex-shrink-0 bg-card border-r border-border flex flex-col h-screen sticky top-0 self-start">
       {/* Logo */}
       <div className="px-5 pt-7 pb-6 border-b border-border">
         <Link href="/">

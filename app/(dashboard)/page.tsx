@@ -2,8 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, History, ChevronRight, ArrowRight } from "lucide-react";
-import { LogoIcon } from "@/components/logo";
+import { Plus, History, ChevronRight, ArrowRight, BarChart3 } from "lucide-react";
 import { useClients, useSessions } from "@/lib/supabase/hooks";
 
 export default function DashboardPage() {
@@ -23,27 +22,24 @@ export default function DashboardPage() {
   }
 
   const stats = [
-    { label: "Sessions", value: sessions?.length ?? 0 },
-    { label: "Clients", value: clients?.length ?? 0 },
+    { label: "Sessions", value: sessions?.length ?? 0, tooltip: "Total completed sessions across all clients" },
+    { label: "Clients", value: clients?.length ?? 0, tooltip: "Unique client organisations" },
     ...(sessions?.[0]
-      ? [{ label: "Last analysis", value: `Today` }]
+      ? [{ label: "Last analysis", value: timeAgo(sessions[0].date), tooltip: `Last analysis: ${sessions[0].date}` }]
       : []),
   ];
-
-  const lastAnalysisDate = sessions?.[0]?.date;
-  if (lastAnalysisDate) {
-    stats[2] = { label: "Last analysis", value: timeAgo(lastAnalysisDate) };
-  }
 
   return (
     <div className="p-8">
       {/* ── Hero ── */}
-      <div className="max-w-2xl mx-auto text-center pt-6 pb-8">
-        <div className="mx-auto mb-5 w-12 h-12">
-          <LogoIcon size={48} />
+      <div className="max-w-2xl mx-auto text-center pt-10 pb-8">
+        <div className="flex items-center justify-center gap-2.5 mb-4">
+          <div className="w-6 h-px bg-primary/30" />
+          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground font-semibold">Dashboard</span>
+          <div className="w-6 h-px bg-primary/30" />
         </div>
         <h1
-          className="text-3xl font-semibold text-foreground mb-3 leading-tight"
+          className="text-[28px] font-semibold text-foreground mb-3 leading-tight"
           style={{ fontFamily: "var(--font-lora), serif" }}
         >
           Turn data into consulting insights
@@ -75,7 +71,7 @@ export default function DashboardPage() {
         <div className="max-w-lg mx-auto mt-4">
           <div className="bg-card border border-border rounded-[14px] p-8 text-center">
             <div className="mx-auto mb-3 w-10 h-10">
-              <LogoIcon size={40} />
+              <BarChart3 className="w-10 h-10 text-muted-foreground/40" />
             </div>
             <p className="text-sm font-medium text-foreground mb-1">No analyses yet</p>
             <p className="text-xs text-muted-foreground">
@@ -96,7 +92,7 @@ export default function DashboardPage() {
         <div className="max-w-2xl mx-auto mb-10">
           <div className="bg-card border border-border rounded-[14px] px-6 py-4 flex items-center justify-center gap-8">
             {stats.map((s) => (
-              <div key={s.label} className="text-center">
+              <div key={s.label} className="text-center" title={(s as any).tooltip ?? ""}>
                 <p className="text-lg font-semibold text-foreground">{s.value}</p>
                 <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{s.label}</p>
               </div>
@@ -108,16 +104,12 @@ export default function DashboardPage() {
       {/* ── Recent sessions ── */}
       {sessions && sessions.length > 0 && (
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3 mb-3">
             <p className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase font-mono">
               Recent Analyses
             </p>
-            <Link
-              href="/history"
-              className="text-[11px] font-medium text-primary hover:underline font-mono"
-            >
-              View all →
-            </Link>
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-[10px] font-mono text-muted-foreground">{sessions.length}</span>
           </div>
           <div className="bg-card border border-border rounded-[14px] divide-y divide-border">
             {sessions.slice(0, 5).map((session) => {
@@ -126,11 +118,18 @@ export default function DashboardPage() {
                 <Link
                   key={session.id}
                   href={`/session-detail?sessionId=${session.id}`}
-                  className="flex items-center gap-4 px-5 py-4 hover:bg-muted/50 transition-colors first:rounded-t-[14px] last:rounded-b-[14px] group"
+                  className="flex items-center gap-4 px-5 py-4 hover:bg-muted/50 active:bg-muted transition-colors first:rounded-t-[14px] last:rounded-b-[14px] group active:scale-[0.995]"
+                  title={`${session.title} — ${session.confidence}% confidence`}
                 >
                   <div
-                    className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                      session.status === "complete" ? "bg-emerald-500" : "bg-amber-400"
+                    className={`w-1 h-8 rounded-full flex-shrink-0 ${
+                      session.confidence >= 75
+                        ? "bg-emerald-400"
+                        : session.confidence >= 55
+                          ? "bg-amber-400"
+                          : session.status === "complete"
+                            ? "bg-primary/40"
+                            : "bg-amber-400"
                     }`}
                   />
                   <div className="flex-1 min-w-0">

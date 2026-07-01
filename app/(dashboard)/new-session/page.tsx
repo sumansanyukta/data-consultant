@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Loader2, Upload, Eye, Plus, Building2 } from "lucide-react";
+import { ArrowRight, Loader2, Upload, Eye, Plus, Building2, Pencil, Check } from "lucide-react";
 import { useClients } from "@/lib/supabase/hooks";
 import { createSession } from "@/lib/supabase/queries";
 import { getSupabase } from "@/lib/supabase/client";
@@ -16,6 +16,8 @@ export default function NewSessionPage() {
   const [selectedClient, setSelectedClient] = useState("");
   const [analysisType, setAnalysisType] = useState<string[]>(["Descriptive"]);
   const [creating, setCreating] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [customTitle, setCustomTitle] = useState("");
 
   const clientList = useMemo(() => clients ?? [], [clients]);
   const client = clientList.find((c) => c.id === selectedClient);
@@ -23,6 +25,8 @@ export default function NewSessionPage() {
   const generatedTitle = client
     ? `${client.name} — ${analysisType.join(" & ")} Review`
     : "";
+
+  const sessionTitle = customTitle || generatedTitle;
 
   function handleSample() {
     setMode("loading");
@@ -38,7 +42,7 @@ export default function NewSessionPage() {
     try {
       const session = await createSession({
         clientId: selectedClient,
-        title: generatedTitle,
+        title: sessionTitle,
         consultant: "",
         analysisType,
       });
@@ -67,7 +71,7 @@ export default function NewSessionPage() {
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={handleSample}
-              className="bg-card border border-border rounded-[14px] p-6 text-center hover:border-primary/40 hover:bg-muted/40 transition-all group"
+              className="bg-card border border-border rounded-[14px] p-6 text-center hover:border-primary/40 hover:bg-muted/40 transition-all group active:scale-[0.98]"
             >
               <Eye className="w-8 h-8 text-primary mx-auto mb-3" />
               <p className="text-sm font-semibold text-foreground mb-1">Try sample data</p>
@@ -83,7 +87,7 @@ export default function NewSessionPage() {
                 }
                 setMode("fresh");
               }}
-              className="bg-card border border-border rounded-[14px] p-6 text-center hover:border-primary/40 hover:bg-muted/40 transition-all group"
+              className="bg-card border border-border rounded-[14px] p-6 text-center hover:border-primary/40 hover:bg-muted/40 transition-all group active:scale-[0.98]"
             >
               <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-3 group-hover:text-primary transition-colors" />
               <p className="text-sm font-semibold text-foreground mb-1">Start fresh</p>
@@ -115,10 +119,10 @@ export default function NewSessionPage() {
                     <button
                       key={c.id}
                       onClick={() => setSelectedClient(c.id)}
-                      className={`p-3 rounded-xl border text-left transition-all ${
+                      className={`p-3 rounded-xl border text-left transition-all active:scale-[0.98] ${
                         selectedClient === c.id
-                          ? "border-primary/40 bg-accent"
-                          : "border-border bg-muted/30 hover:border-border hover:bg-muted/60"
+                          ? "border-primary/60 bg-accent ring-1 ring-primary/20"
+                          : "border-border bg-muted/30 hover:border-muted-foreground/30 hover:bg-muted/60"
                       }`}
                     >
                       <p className={`text-xs font-semibold ${selectedClient === c.id ? "text-accent-foreground" : "text-foreground"}`}>
@@ -190,10 +194,10 @@ export default function NewSessionPage() {
                         prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
                       )
                     }
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all active:scale-[0.97] ${
                       analysisType.includes(t)
-                        ? "bg-accent border-primary/30 text-accent-foreground"
-                        : "bg-muted border-border text-muted-foreground hover:text-foreground"
+                        ? "bg-accent border-primary/40 text-accent-foreground shadow-sm"
+                        : "bg-muted border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/30"
                     }`}
                   >
                     {t}
@@ -202,8 +206,27 @@ export default function NewSessionPage() {
               </div>
               {generatedTitle && (
                 <div className="mt-4 bg-muted/50 rounded-xl px-4 py-3">
-                  <p className="text-[11px] text-muted-foreground font-mono mb-0.5">Session title</p>
-                  <p className="text-sm font-medium text-foreground">{generatedTitle}</p>
+                  <div className="flex items-center justify-between mb-0.5">
+                    <p className="text-[11px] text-muted-foreground font-mono">Session title</p>
+                    <button
+                      onClick={() => { setEditingTitle(!editingTitle); if (!editingTitle) setCustomTitle(generatedTitle); }}
+                      className="text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                    >
+                      {editingTitle ? <Check className="w-3 h-3" /> : <Pencil className="w-3 h-3" />}
+                      {editingTitle ? "Done" : "Edit"}
+                    </button>
+                  </div>
+                  {editingTitle ? (
+                    <input
+                      type="text"
+                      value={customTitle}
+                      onChange={(e) => setCustomTitle(e.target.value)}
+                      className="w-full bg-card border border-border rounded-lg px-3 py-1.5 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                      autoFocus
+                    />
+                  ) : (
+                    <p className="text-sm font-medium text-foreground">{sessionTitle}</p>
+                  )}
                 </div>
               )}
             </div>
