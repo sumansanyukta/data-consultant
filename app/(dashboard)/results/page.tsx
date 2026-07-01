@@ -13,9 +13,11 @@ import {
   Save,
   CheckCircle2,
   Download,
-  Database,
-  BarChart3,
-  Shield,
+  ShieldCheck,
+  ScanLine,
+  Table2,
+  Rows3,
+  AlertTriangle,
 } from "lucide-react";
 import { useSessionDetail } from "@/lib/supabase/hooks";
 import { addConsultantNote } from "@/lib/supabase/queries";
@@ -119,60 +121,70 @@ function ResultsInner() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      {/* Compact header */}
-      <div className="flex items-start justify-between mb-5">
+    <div className="p-8 max-w-4xl mx-auto">
+      {/* ── Header ── */}
+      <div className="flex items-start justify-between mb-6">
         <div className="min-w-0">
-          <p className="text-[10px] font-mono text-muted-foreground mb-0.5 truncate">{session.title}</p>
+          <p className="text-[11px] font-mono text-muted-foreground mb-1 truncate">{session.title}</p>
           <h1
-            className="text-lg font-semibold text-foreground"
+            className="text-xl font-semibold text-foreground"
             style={{ fontFamily: "var(--font-lora), serif" }}
           >
             Results
           </h1>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0 ml-4">
-          <button onClick={downloadReport} className="flex items-center gap-1 bg-card border border-border text-foreground px-2.5 py-1.5 rounded-lg text-[10px] font-medium hover:bg-muted transition-colors">
-            <Download className="w-3 h-3" />
+          <button
+            onClick={downloadReport}
+            className="flex items-center gap-1.5 bg-card border border-border text-foreground px-3 py-2 rounded-xl text-xs font-medium hover:bg-muted transition-all shadow-sm hover:shadow-md active:scale-[0.98]"
+          >
+            <Download className="w-3.5 h-3.5" />
             Export
           </button>
-          <button onClick={() => router.push(`/next-steps?sessionId=${sessionId}`)} className="flex items-center gap-1 bg-primary text-primary-foreground px-2.5 py-1.5 rounded-lg text-[10px] font-medium hover:bg-primary/90 transition-colors">
+          <button
+            onClick={() => router.push(`/next-steps?sessionId=${sessionId}`)}
+            className="flex items-center gap-1.5 bg-primary text-primary-foreground px-3 py-2 rounded-xl text-xs font-medium hover:bg-primary/90 transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
+          >
             View tasks
-            <ArrowRight className="w-3 h-3" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Compact stat pills */}
-      <div className="flex items-center gap-2 mb-6 flex-wrap">
+      {/* ── Hero stat strip ── */}
+      <div className="grid grid-cols-5 gap-3 mb-8">
         {[
-          { label: "Confidence", value: `${output.confidenceScore}%` },
-          { label: "Completeness", value: `${output.dataCompleteness}%` },
-          { label: "Columns", value: String(colCount) },
-          { label: "Rows", value: rowCount.toLocaleString() },
-          { label: "Flags", value: String(flags.length) },
-        ].map(({ label, value }) => (
-          <div key={label} className="bg-card border border-border rounded-lg px-3 py-1.5 flex items-center gap-2" title={`${label}: ${value}`}>
-            <span className="text-[11px] font-semibold text-foreground font-mono">{value}</span>
-            <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">{label}</span>
+          { label: "Confidence", value: `${output.confidenceScore}%`, icon: ShieldCheck, gradient: "from-emerald-50/80 to-emerald-50/20", border: "border-emerald-200/50", iconColor: "text-emerald-600" },
+          { label: "Completeness", value: `${output.dataCompleteness}%`, icon: ScanLine, gradient: "from-primary/5 to-primary/[0.02]", border: "border-border", iconColor: "text-primary" },
+          { label: "Columns", value: String(colCount), icon: Table2, gradient: "from-accent/60 to-accent/20", border: "border-border", iconColor: "text-primary" },
+          { label: "Rows", value: rowCount.toLocaleString(), icon: Rows3, gradient: "from-muted/60 to-muted/20", border: "border-border", iconColor: "text-muted-foreground" },
+          { label: "Flags", value: String(flags.length), icon: AlertTriangle, gradient: flags.length > 0 ? "from-amber-50/80 to-amber-50/20" : "from-muted/60 to-muted/20", border: flags.length > 0 ? "border-amber-200/50" : "border-border", iconColor: flags.length > 0 ? "text-amber-600" : "text-muted-foreground" },
+        ].map(({ label, value, icon: Icon, gradient, border, iconColor }) => (
+          <div key={label} className={`bg-card border ${border} rounded-[14px] p-4 shadow-sm hover:shadow-md transition-all`}>
+            <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${gradient} border border-border/50 flex items-center justify-center mb-2.5`}>
+              <Icon className={`w-4 h-4 ${iconColor}`} />
+            </div>
+            <p className="text-xl font-semibold text-foreground tracking-tight">{value}</p>
+            <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mt-0.5">{label}</p>
           </div>
         ))}
       </div>
 
+      {/* ── Collapsible sections ── */}
       <div className="space-y-3">
         {/* Overview — default open */}
         <CollapsibleSection title="Overview" defaultOpen>
           {output.execSummary && (
-            <p className="text-xs text-foreground leading-relaxed mb-4">
+            <p className="text-sm text-foreground leading-[1.75] mb-5">
               {output.execSummary}
             </p>
           )}
           {signals.length > 0 && (
             <div>
-              <p className="text-[10px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2">Key Signals</p>
-              <div className="flex flex-wrap gap-1.5">
+              <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2.5">Key Signals</p>
+              <div className="flex flex-wrap gap-2">
                 {signals.map((s: string, i: number) => (
-                  <span key={i} className="text-[10px] bg-accent text-accent-foreground px-2 py-1 rounded-lg font-medium">
+                  <span key={i} className="text-xs bg-accent text-accent-foreground px-3 py-1.5 rounded-lg font-medium shadow-sm">
                     {s}
                   </span>
                 ))}
@@ -183,19 +195,25 @@ function ResultsInner() {
 
         {/* Data Profile */}
         <CollapsibleSection title="Data Profile" count={typeData.length + severityData.length}>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-5">
             <div>
-              <p className="text-[10px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2">Column Health — Null Rate</p>
-              <NullBarChart data={nullData} />
+              <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2.5">Column Health — Null Rate</p>
+              <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
+                <NullBarChart data={nullData} />
+              </div>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <p className="text-[10px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2">Column Types</p>
-                <ColumnTypeChart data={typeData} />
+                <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2.5">Column Types</p>
+                <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
+                  <ColumnTypeChart data={typeData} />
+                </div>
               </div>
               <div>
-                <p className="text-[10px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2">Quality Flags</p>
-                <SeverityChart data={severityData} total={flags.length} />
+                <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2.5">Quality Flags</p>
+                <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
+                  <SeverityChart data={severityData} total={flags.length} />
+                </div>
               </div>
             </div>
           </div>
@@ -209,55 +227,61 @@ function ResultsInner() {
             stats.topValues?.length ?? 0,
             stats.outliers?.length ?? 0,
           ].reduce((a, b) => a + b, 0)}>
-            <div className="space-y-4">
+            <div className="space-y-5">
               {stats.correlations?.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2">Correlations</p>
-                  <CorrelationHeatmap data={stats.correlations} allColumns={columns} />
+                  <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2.5">Correlations</p>
+                  <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
+                    <CorrelationHeatmap data={stats.correlations} allColumns={columns} />
+                  </div>
                 </div>
               )}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-5">
                 {stats.distributions?.length > 0 && (
                   <div>
-                    <p className="text-[10px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2">Distributions</p>
-                    <DistributionChart data={stats.distributions} />
+                    <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2.5">Distributions</p>
+                    <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
+                      <DistributionChart data={stats.distributions} />
+                    </div>
                   </div>
                 )}
                 {stats.topValues?.length > 0 && (
                   <div>
-                    <p className="text-[10px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2">Top Values</p>
-                    <TopValuesChart data={stats.topValues} />
+                    <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2.5">Top Values</p>
+                    <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
+                      <TopValuesChart data={stats.topValues} />
+                    </div>
                   </div>
                 )}
               </div>
               {stats.outliers?.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2">Outliers</p>
-                  <div className="space-y-1">
+                  <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2.5">Outliers</p>
+                  <div className="bg-muted/30 rounded-xl p-4 border border-border/50 space-y-1.5">
                     {stats.outliers.slice(0, 8).map((o: any, i: number) => (
-                      <div key={i} className="flex items-center gap-2 text-[10px] font-mono">
-                        <span className="text-muted-foreground w-20 truncate">{o.col}</span>
+                      <div key={i} className="flex items-center gap-2 text-xs font-mono">
+                        <span className="text-muted-foreground w-24 truncate">{o.col}</span>
                         <span className="text-amber-600 font-semibold">{o.value}</span>
                         <span className="text-muted-foreground">row {o.row + 2}</span>
                       </div>
                     ))}
                     {stats.outliers.length > 8 && (
-                      <p className="text-[9px] text-muted-foreground font-mono">+{stats.outliers.length - 8} more</p>
+                      <p className="text-[10px] text-muted-foreground font-mono">+{stats.outliers.length - 8} more</p>
                     )}
                   </div>
                 </div>
               )}
               {stats.correlations?.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2">Relationships</p>
-                  <div className="grid grid-cols-2 gap-1.5">
+                  <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2.5">Relationships</p>
+                  <div className="grid grid-cols-2 gap-2">
                     {stats.correlations.slice(0, 6).map((pair: any, i: number) => (
-                      <div key={i} className="flex items-center gap-1.5 text-[10px] font-mono">
-                        <div className={`w-1.5 h-1.5 rounded-full ${pair.r > 0 ? "bg-emerald-500" : "bg-rose-500"}`} />
+                      <div key={i} className="flex items-center gap-2 text-xs font-mono bg-muted/30 rounded-xl px-3 py-2 border border-border/50">
+                        <div className={`w-2 h-2 rounded-full ${pair.r > 0 ? "bg-emerald-500" : "bg-rose-500"}`} />
                         <span className="text-foreground">{pair.colA}</span>
                         <span className="text-muted-foreground">×</span>
                         <span className="text-foreground">{pair.colB}</span>
-                        <span className={pair.r > 0.5 ? "text-emerald-600 font-semibold" : pair.r < -0.5 ? "text-rose-600 font-semibold" : "text-muted-foreground"}>{pair.r}</span>
+                        <span className={`ml-auto font-semibold ${pair.r > 0.5 ? "text-emerald-600" : pair.r < -0.5 ? "text-rose-600" : "text-muted-foreground"}`}>{pair.r}</span>
                       </div>
                     ))}
                   </div>
@@ -270,22 +294,22 @@ function ResultsInner() {
         {/* Recommendations */}
         {(analyses.length > 0 || flags.length > 0 || output.followUpQuestions?.length > 0 || output.assumptions?.length > 0 || (output.suggestedKpis && output.suggestedKpis.length > 0)) && (
           <CollapsibleSection title="Recommendations" count={analyses.length + flags.length}>
-            <div className="space-y-4">
+            <div className="space-y-5">
               {analyses.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2">Recommended Analyses</p>
-                  <div className="space-y-2">
+                  <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2.5">Recommended Analyses</p>
+                  <div className="space-y-2.5">
                     {analyses.slice(0, 3).map((a: any, i: number) => (
-                      <div key={i} className="flex items-start gap-2.5 p-2.5 rounded-lg bg-muted/40">
-                        <div className="w-4 h-4 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-[9px] font-mono font-semibold text-primary">{i + 1}</span>
+                      <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 border border-border/50 shadow-sm">
+                        <div className="w-5 h-5 rounded-lg bg-accent flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-[10px] font-mono font-semibold text-primary">{i + 1}</span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-[11px] font-semibold text-foreground truncate">{a.title}</span>
-                            <span className="text-[9px] font-mono text-muted-foreground">{a.confidence}%</span>
+                            <span className="text-xs font-semibold text-foreground truncate">{a.title}</span>
+                            <span className="text-[10px] font-mono text-muted-foreground">{a.confidence}%</span>
                           </div>
-                          <p className="text-[10px] text-muted-foreground leading-relaxed">{a.desc}</p>
+                          <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{a.desc}</p>
                         </div>
                       </div>
                     ))}
@@ -295,20 +319,20 @@ function ResultsInner() {
 
               {output.suggestedKpis && output.suggestedKpis.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2">KPIs</p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2.5">KPIs</p>
+                  <div className="grid grid-cols-2 gap-3">
                     {output.suggestedKpis.map((kpi: any, i: number) => (
-                      <div key={i} className={`rounded-lg p-3 border ${
-                        kpi.priority === "high" ? "bg-emerald-50/50 border-emerald-200" : kpi.priority === "medium" ? "bg-amber-50/50 border-amber-200" : "bg-muted/30 border-border"
+                      <div key={i} className={`rounded-xl p-4 border shadow-sm ${
+                        kpi.priority === "high" ? "bg-emerald-50/30 border-emerald-200/60" : kpi.priority === "medium" ? "bg-amber-50/30 border-amber-200/60" : "bg-muted/20 border-border/50"
                       }`}>
-                        <div className="flex items-start justify-between gap-2 mb-1">
-                          <span className="text-[11px] font-semibold text-foreground">{kpi.name}</span>
-                          <span className={`text-[9px] font-mono uppercase tracking-wider font-semibold ${
+                        <div className="flex items-start justify-between gap-2 mb-1.5">
+                          <span className="text-xs font-semibold text-foreground">{kpi.name}</span>
+                          <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${
                             kpi.priority === "high" ? "text-emerald-700" : kpi.priority === "medium" ? "text-amber-700" : "text-muted-foreground"
                           }`}>{kpi.priority}</span>
                         </div>
-                        <p className="text-[10px] text-muted-foreground leading-relaxed mb-1.5">{kpi.description}</p>
-                        <code className="block text-[9px] font-mono bg-card border border-border rounded-md px-2 py-1 text-foreground/80">{kpi.formula}</code>
+                        <p className="text-xs text-muted-foreground leading-relaxed mb-2">{kpi.description}</p>
+                        <code className="block text-[10px] font-mono bg-card border border-border/50 rounded-md px-2.5 py-1.5 text-foreground/80">{kpi.formula}</code>
                       </div>
                     ))}
                   </div>
@@ -317,13 +341,13 @@ function ResultsInner() {
 
               {flags.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2">Quality Flags</p>
-                  <div className="space-y-1.5">
+                  <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2.5">Quality Flags</p>
+                  <div className="space-y-2">
                     {flags.map((f: any, i: number) => (
-                      <div key={i} className="flex items-start gap-2 text-[10px]">
-                        {f.severity === "danger" ? <AlertCircle className="w-3 h-3 text-red-500 flex-shrink-0 mt-0.5" /> : f.severity === "warning" ? <Flag className="w-3 h-3 text-amber-500 flex-shrink-0 mt-0.5" /> : <Info className="w-3 h-3 text-blue-400 flex-shrink-0 mt-0.5" />}
+                      <div key={i} className="flex items-start gap-2.5 text-xs bg-muted/30 rounded-xl px-3 py-2.5 border border-border/50">
+                        {f.severity === "danger" ? <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" /> : f.severity === "warning" ? <Flag className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" /> : <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />}
                         <div>
-                          <code className="text-[9px] font-mono bg-muted px-1 py-0.5 rounded text-foreground">{f.field}</code>
+                          <code className="text-[10px] font-mono bg-card px-1.5 py-0.5 rounded text-foreground border border-border/50">{f.field}</code>
                           <p className="text-muted-foreground mt-0.5">{f.issue}</p>
                         </div>
                       </div>
@@ -334,11 +358,11 @@ function ResultsInner() {
 
               {output.followUpQuestions && output.followUpQuestions.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2">Questions</p>
-                  <div className="space-y-1.5">
+                  <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2.5">Questions</p>
+                  <div className="space-y-2">
                     {output.followUpQuestions.slice(0, 3).map((q: string, i: number) => (
-                      <div key={i} className="flex items-start gap-2 text-[10px]">
-                        <MessageSquare className="w-3 h-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+                      <div key={i} className="flex items-start gap-2.5 text-xs bg-muted/30 rounded-xl px-3 py-2.5 border border-border/50">
+                        <MessageSquare className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                         <span className="text-muted-foreground">{q}</span>
                       </div>
                     ))}
@@ -348,11 +372,11 @@ function ResultsInner() {
 
               {output.assumptions && output.assumptions.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2">Assumptions</p>
-                  <div className="space-y-1.5">
+                  <p className="text-[11px] font-mono font-semibold tracking-widest text-muted-foreground uppercase mb-2.5">Assumptions</p>
+                  <div className="space-y-2">
                     {output.assumptions.slice(0, 3).map((a: string, i: number) => (
-                      <div key={i} className="flex items-start gap-2 text-[10px]">
-                        <Lightbulb className="w-3 h-3 text-amber-400 flex-shrink-0 mt-0.5" />
+                      <div key={i} className="flex items-start gap-2.5 text-xs bg-muted/30 rounded-xl px-3 py-2.5 border border-border/50">
+                        <Lightbulb className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
                         <span className="text-muted-foreground">{a}</span>
                       </div>
                     ))}
@@ -366,9 +390,9 @@ function ResultsInner() {
         {/* Notes */}
         <CollapsibleSection title="Notes" count={data?.notes?.length}>
           {data?.notes && data.notes.length > 0 && (
-            <div className="space-y-1.5 mb-3 pb-3 border-b border-border">
+            <div className="space-y-2 mb-4 pb-4 border-b border-border/50">
               {data.notes.map((note) => (
-                <div key={note.id} className="text-[11px] text-foreground leading-relaxed bg-muted/50 rounded-lg px-3 py-2">{note.noteText}</div>
+                <div key={note.id} className="text-sm text-foreground leading-relaxed bg-muted/30 rounded-xl px-4 py-3 border border-border/50">{note.noteText}</div>
               ))}
             </div>
           )}
@@ -377,9 +401,9 @@ function ResultsInner() {
             onChange={(e) => { setNotes(e.target.value); setNotesSaved(false); }}
             rows={2}
             placeholder="Add a note…"
-            className="w-full bg-input-background border border-border rounded-lg px-3 py-2 text-[11px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none leading-relaxed"
+            className="w-full bg-input-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none leading-relaxed"
           />
-          <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center justify-between mt-3">
             <span />
             <button
               onClick={async () => {
@@ -392,11 +416,11 @@ function ResultsInner() {
                 } finally { setNotesSaving(false); }
               }}
               disabled={!notes.trim() || notesSaving}
-              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium transition-colors ${
-                notesSaved ? "bg-emerald-50 text-emerald-700" : notes.trim() && !notesSaving ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer" : "bg-muted text-muted-foreground cursor-not-allowed"
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all active:scale-[0.98] ${
+                notesSaved ? "bg-emerald-50 text-emerald-700 border border-emerald-200/50" : notes.trim() && !notesSaving ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer shadow-sm" : "bg-muted text-muted-foreground cursor-not-allowed"
               }`}
             >
-              {notesSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : notesSaved ? <CheckCircle2 className="w-3 h-3" /> : <Save className="w-3 h-3" />}
+              {notesSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : notesSaved ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
               {notesSaved ? "Saved" : notesSaving ? "Saving..." : "Save"}
             </button>
           </div>

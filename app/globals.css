@@ -47,27 +47,26 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --shadow-card: 0 1px 3px rgba(26,25,23,0.04), 0 1px 2px rgba(26,25,23,0.02);
-  --shadow-card-hover: 0 4px 12px rgba(26,25,23,0.06), 0 2px 4px rgba(26,25,23,0.03);
 }
 
-@layer utilities {
-  .shadow-card {
-    box-shadow: var(--shadow-card);
-  }
-  .shadow-card-hover {
-    box-shadow: var(--shadow-card-hover);
-  }
+@utility shadow-sm {
+  box-shadow: 0 1px 2px rgba(26,25,23,0.04);
 }
 
+@utility shadow-md {
+  box-shadow: 0 4px 12px rgba(26,25,23,0.06), 0 2px 4px rgba(26,25,23,0.03);
+}
+
+@utility shadow-lg {
+  box-shadow: 0 8px 24px rgba(26,25,23,0.08), 0 4px 8px rgba(26,25,23,0.04);
+}
+
+@utility shadow-xl {
+  box-shadow: 0 16px 40px rgba(26,25,23,0.1), 0 8px 16px rgba(26,25,23,0.05);
+}
 
 * {
   border-color: var(--border);
-}
-
-/* Card shadow */
-.bg-card {
-  box-shadow: var(--shadow-card);
 }
 
 html {
@@ -78,4 +77,9 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
