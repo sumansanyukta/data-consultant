@@ -26,7 +26,7 @@ export function ColumnTypeChart({ data }: Props) {
 
   return (
     <div className="flex items-center gap-5">
-      <div className="w-28 h-28 flex-shrink-0">
+      <div className="w-28 h-32 flex-shrink-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -43,16 +43,6 @@ export function ColumnTypeChart({ data }: Props) {
                 <Cell key={d.type} fill={COLORS[d.type] ?? "#B0ADAA"} />
               ))}
             </Pie>
-            <Legend
-              verticalAlign="bottom"
-              iconType="circle"
-              iconSize={6}
-              formatter={(value: string) => (
-                <span style={{ fontSize: 10, fontFamily: "var(--font-jetbrains)", color: "#7A776F" }}>
-                  {value} ({data.find((d) => d.type === value)?.count ?? 0})
-                </span>
-              )}
-            />
           </PieChart>
         </ResponsiveContainer>
       </div>

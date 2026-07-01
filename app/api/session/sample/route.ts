@@ -63,7 +63,7 @@ export async function POST() {
 
     if (uploadErr) throw uploadErr;
 
-    return NextResponse.json({ sessionId: session.id, storagePath });
+    return NextResponse.json({ sessionId: session.id, storagePath, title: session.title });
   } catch (error: any) {
     console.error("Failed to create sample session", error);
     return NextResponse.json(

@@ -17,6 +17,7 @@ export default function NewSessionPage() {
   const [analysisType, setAnalysisType] = useState<string[]>(["Descriptive"]);
   const [creating, setCreating] = useState(false);
   const [sampleSessionId, setSampleSessionId] = useState<string | null>(null);
+  const [sampleTitle, setSampleTitle] = useState<string>("");
 
   const clientList = useMemo(() => clients ?? [], [clients]);
 
@@ -24,8 +25,9 @@ export default function NewSessionPage() {
     setMode("loading");
     fetch("/api/session/sample", { method: "POST" })
       .then((r) => r.json())
-      .then(({ sessionId }) => {
+      .then(({ sessionId, title }) => {
         setSampleSessionId(sessionId);
+        setSampleTitle(title ?? "E-Commerce Performance Review");
         setMode("sample-ready");
       })
       .catch(() => setMode("choose"));
@@ -237,6 +239,9 @@ export default function NewSessionPage() {
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-50/80 to-emerald-50/20 border border-emerald-200/50 flex items-center justify-center mx-auto mb-4">
               <Check className="w-6 h-6 text-emerald-600" />
             </div>
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-[0.15em] mb-2 font-semibold">
+              {sampleTitle}
+            </p>
             <h1
               className="text-xl font-semibold text-foreground mb-1.5"
               style={{ fontFamily: "var(--font-lora), serif" }}
@@ -244,7 +249,7 @@ export default function NewSessionPage() {
               Sample data loaded
             </h1>
             <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-              A 151-row retail e-commerce dataset is ready. We&apos;ve drafted a brief — review it, then run the analysis.
+              151 retail transactions · Revenue, category, region, customer segments · Q4 2025 to Jan 2026. We&apos;ve drafted a brief — review it, then run the analysis.
             </p>
           </div>
 
